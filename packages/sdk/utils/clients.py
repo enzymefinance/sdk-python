@@ -1,10 +1,8 @@
-import asyncio
-from pathlib import Path
-import json
 from web3 import AsyncWeb3
 from web3.types import TContractFn, HexBytes, TxParams
 from web3.contract import AsyncContract
-from web3.middleware import ExtraDataToPOAMiddleware, SignAndSendRawMiddlewareBuilder
+from web3.middleware import ExtraDataToPOAMiddleware
+from ...abis import abis
 
 
 # create PublicClient and WalletClient
@@ -21,14 +19,9 @@ class PublicClient:
 
     def contract(self, address: str, abi_name: str) -> AsyncContract:
         if address not in self._contracts:
-            abi = self._load_abi(abi_name)
+            abi = abis.fetch(abi_name)
             self._contracts[address] = self.w3.eth.contract(address=address, abi=abi)
         return self._contracts[address]
-
-    def _load_abi(self, abi_name: str) -> list[dict]:
-        path = Path(__file__).parents[2] / "abis" / "abis" / f"{abi_name}.abi.json"
-        with open(path, "r") as f:
-            return json.load(f)
 
 
 class WalletClient(PublicClient):
