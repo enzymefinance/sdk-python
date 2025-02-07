@@ -27,7 +27,6 @@ class PublicClient:
 
     def _load_abi(self, abi_name: str) -> list[dict]:
         path = Path(__file__).parents[2] / "abis" / "abis" / f"{abi_name}.abi.json"
-        print(path)
         with open(path, "r") as f:
             return json.load(f)
 
