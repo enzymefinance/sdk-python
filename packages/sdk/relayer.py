@@ -1,5 +1,5 @@
 from web3 import Web3
-from web3.types import ChecksumAddress, TxParams, HexBytes, HexStr
+from web3.types import ChecksumAddress, TxParams, HexStr
 from web3.constants import ADDRESS_ZERO
 from .utils.clients import PublicClient, WalletClient
 from eth_abi import encode
@@ -225,8 +225,8 @@ async def get_nonce(
 def encode_relay_call_data(
     max_acceptance_budget: int,
     relay_request: dict,
-    signature: HexBytes,
-    approval_data: HexBytes,
+    signature: HexStr,
+    approval_data: HexStr,
     gas_limit: int,
 ) -> HexStr:
     contract = Web3().eth.contract(abi=RELAY_HUB_ABI)

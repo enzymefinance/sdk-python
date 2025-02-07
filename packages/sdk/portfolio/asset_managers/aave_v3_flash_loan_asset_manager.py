@@ -1,5 +1,5 @@
 from web3 import Web3
-from web3.types import ChecksumAddress, HexStr, HexBytes, TxParams
+from web3.types import ChecksumAddress, HexStr, TxParams
 from eth_abi import encode
 from ...utils.clients import PublicClient, WalletClient
 from ....abis import abis
@@ -25,8 +25,9 @@ def encode_deploy_proxy_construct_data(
 async def deploy_proxy(
     client: WalletClient,
     dispatcher_owned_beacon_factory: ChecksumAddress,
-    construct_data: HexBytes,
+    construct_data: HexStr,
 ) -> TxParams:
+    construct_data = Web3.to_bytes(hexstr=construct_data)
     contract = client.contract(
         dispatcher_owned_beacon_factory, "IDispatcherOwnedBeaconFactory"
     )
@@ -58,10 +59,10 @@ FLASH_LOAN_CALLS_ENCODING = [
 
 
 def encode_flash_loan_calls(
-    calls: list[ChecksumAddress, HexBytes],
+    calls: list[ChecksumAddress, HexStr],
 ) -> HexStr:
     types = ["(address,bytes)[]"]
-    args = [calls]
+    args = [[[target, Web3.to_bytes(hexstr=data)] for target, data in calls]]
     return "0x" + encode(types, args).hex()
 
 
@@ -70,7 +71,7 @@ async def flash_loan(
     aave_v3_flash_loan_asset_manager: ChecksumAddress,
     assets: list[ChecksumAddress],
     amounts: list[int],
-    encoded_calls: HexBytes,
+    encoded_calls: HexStr,
 ) -> TxParams:
     contract = client.contract(
         aave_v3_flash_loan_asset_manager, "IAaveV3FlashLoanAssetManager"
