@@ -13,8 +13,8 @@ authors = [
     {name = "Enzyme", email = "info@enzyme.finance"}
 ]
 dependencies = [
-    "web3>=7.0.0",
-    "requests>=2.25.0",
+    "web3>=7.8.0",
+    "requests>=2.32.0",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
