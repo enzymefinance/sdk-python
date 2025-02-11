@@ -1,7 +1,6 @@
 from web3 import Web3
 from web3.types import ChecksumAddress, HexStr, TxParams
 from eth_abi import encode, decode
-from pydantic import BaseModel
 from typing import TypedDict
 from .extensions import call_extension
 from ..utils.clients import WalletClient
@@ -29,11 +28,13 @@ SELECTOR = {
 }
 
 
-class UseParams(BaseModel):
-    comptroller_proxy: ChecksumAddress
-    integration_manager: ChecksumAddress
-    integration_adapter: ChecksumAddress
-    call_args: HexStr
+# TODO: finish make_use()
+
+# class UseParams(BaseModel):
+#     comptroller_proxy: ChecksumAddress
+#     integration_manager: ChecksumAddress
+#     integration_adapter: ChecksumAddress
+#     call_args: HexStr
 
 
 # def make_use(selector: HexStr, encode: Callable) -> Callable:
@@ -43,7 +44,6 @@ class UseParams(BaseModel):
 # --------------------------------------------------------------------------------------------
 # CALL ON INTEGRATION
 # --------------------------------------------------------------------------------------------
-
 
 CALL_ENCODING = [
     {
@@ -87,7 +87,7 @@ def call_decode(encoded: HexStr) -> CallArgs:
     )
 
 
-def call(
+async def call(
     client: WalletClient,
     comptroller_proxy: ChecksumAddress,
     integration_manager: ChecksumAddress,
@@ -95,19 +95,23 @@ def call(
     function_selector: HexStr,
     call_args: HexStr = "0x",
 ) -> TxParams:
-    return call_extension(
+    call_args = CallArgs(
+        integration_adapter=integration_adapter,
+        function_selector=function_selector,
+        call_args=call_args,
+    )
+    return await call_extension(
         client,
         comptroller_proxy,
         integration_manager,
         ACTION["call_on_integration"],
-        call_encode(integration_adapter, function_selector, call_args),
+        call_encode(call_args),
     )
 
 
 # --------------------------------------------------------------------------------------------
 # ADD TRACKED ASSET
 # --------------------------------------------------------------------------------------------
-
 
 ADD_TRACKED_ASSETS_ENCODING = [
     {
@@ -129,13 +133,13 @@ def add_tracked_assets_decode(encoded: HexStr) -> list[ChecksumAddress]:
     return decoded[0]
 
 
-def add_tracked_assets(
+async def add_tracked_assets(
     client: WalletClient,
     comptroller_proxy: ChecksumAddress,
     integration_manager: ChecksumAddress,
     add_assets: list[ChecksumAddress],
 ) -> TxParams:
-    return call_extension(
+    return await call_extension(
         client,
         comptroller_proxy,
         integration_manager,
@@ -147,7 +151,6 @@ def add_tracked_assets(
 # --------------------------------------------------------------------------------------------
 # REMOVE TRACKED ASSET
 # --------------------------------------------------------------------------------------------
-
 
 REMOVE_TRACKED_ASSETS_ENCODING = [
     {
@@ -169,13 +172,13 @@ def remove_tracked_assets_decode(encoded: HexStr) -> list[ChecksumAddress]:
     return decoded[0]
 
 
-def remove_tracked_assets(
+async def remove_tracked_assets(
     client: WalletClient,
     comptroller_proxy: ChecksumAddress,
     integration_manager: ChecksumAddress,
     remove_assets: list[ChecksumAddress],
 ) -> TxParams:
-    return call_extension(
+    return await call_extension(
         client,
         comptroller_proxy,
         integration_manager,
