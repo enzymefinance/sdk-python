@@ -7,7 +7,7 @@ name = "enzyme-finance"
 version = "0.1.0"
 description = "Official Python SDK for the Enzyme Protocol"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 license = {file = "LICENSE"}
 authors = [
     {name = "Enzyme", email = "info@enzyme.finance"}
