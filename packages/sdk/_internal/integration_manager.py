@@ -1,7 +1,7 @@
 from web3 import Web3
 from web3.types import ChecksumAddress, HexStr, TxParams
 from eth_abi import encode, decode
-from typing import TypedDict
+from typing import TypedDict, Callable, Any
 from .extensions import call_extension
 from ..utils.clients import WalletClient
 
@@ -28,17 +28,24 @@ SELECTOR = {
 }
 
 
-# TODO: finish make_use()
+def make_use(selector: HexStr, encoder: Callable) -> Callable:
+    async def use_integration(
+        client: WalletClient,
+        comptroller_proxy: ChecksumAddress,
+        integration_manager: ChecksumAddress,
+        integration_adapter: ChecksumAddress,
+        call_args: Any,
+    ) -> TxParams:
+        return await call(
+            client,
+            comptroller_proxy,
+            integration_manager,
+            integration_adapter,
+            selector,
+            encoder(call_args),
+        )
 
-# class UseParams(BaseModel):
-#     comptroller_proxy: ChecksumAddress
-#     integration_manager: ChecksumAddress
-#     integration_adapter: ChecksumAddress
-#     call_args: HexStr
-
-
-# def make_use(selector: HexStr, encode: Callable) -> Callable:
-#     return lambda args: call(args, selector, encode(args))
+    return use_integration
 
 
 # --------------------------------------------------------------------------------------------

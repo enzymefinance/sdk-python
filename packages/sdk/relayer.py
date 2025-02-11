@@ -2,7 +2,6 @@ from web3 import Web3
 from web3.types import ChecksumAddress, TxParams, HexStr
 from web3.constants import ADDRESS_ZERO
 from .utils.clients import PublicClient, WalletClient
-from eth_abi import encode
 
 
 RELAY_HUB_ABI = [

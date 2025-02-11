@@ -1,5 +1,6 @@
-from typing import TypedDict
+from typing import TypedDict, Callable, Any
 from web3.types import ChecksumAddress, HexStr, TxParams
+from web3.constants import ADDRESS_ZERO
 from eth_abi import encode, decode
 from web3 import Web3
 from ..utils.clients import WalletClient
@@ -14,20 +15,50 @@ ACTION = {
 }
 
 
-# TODO: finish make_use() and make_create_and_use()
+def make_use(action: int, encoder: Callable | None = None) -> Callable:
+    async def use_external_position(
+        client: WalletClient,
+        comptroller_proxy: ChecksumAddress,
+        external_position_manager: ChecksumAddress,
+        external_position_proxy: ChecksumAddress,
+        action_args: Any,
+    ) -> TxParams:
+        return await call(
+            client,
+            comptroller_proxy,
+            external_position_manager,
+            external_position_proxy,
+            action,
+            "0x" if encoder is None else encoder(action_args),
+        )
 
-# class UseParams(TypedDict):
-#     comptroller_proxy: ChecksumAddress
-#     external_position_manager: ChecksumAddress
-#     external_position_proxy: ChecksumAddress
-#     call_args: HexStr
-
-# async def make_use(action: int, encode: Callable) -> Callable:
-#     return lambda args: call(args, action, encode(args))
+    return use_external_position
 
 
-# async def make_create_and_use(action: int, encode: Callable) -> Callable:
-#     return lambda args: create_and_use(args, action, encode(args))
+def make_create_and_use(action: int, encoder: Callable | None = None) -> Callable:
+    async def create_and_use(
+        client: WalletClient,
+        type_id: int,
+        comptroller_proxy: ChecksumAddress,
+        external_position_manager: ChecksumAddress,
+        initialization_data: HexStr,
+        action_args: Any,
+    ) -> TxParams:
+        call_args = CallArgs(
+            external_position_proxy=ADDRESS_ZERO,
+            action_id=action,
+            action_args="0x" if encoder is None else encoder(action_args),
+        )
+        return await create(
+            client,
+            type_id,
+            comptroller_proxy,
+            external_position_manager,
+            initialization_data,
+            call_encode(call_args),
+        )
+
+    return create_and_use
 
 
 # --------------------------------------------------------------------------------------------
