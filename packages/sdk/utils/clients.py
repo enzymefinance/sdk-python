@@ -1,13 +1,8 @@
 from web3 import AsyncWeb3
-from web3.types import TContractFn, HexBytes, TxParams
+from web3.types import TContractFn, HexStr, TxParams
 from web3.contract import AsyncContract
 from web3.middleware import ExtraDataToPOAMiddleware
 from ...abis import abis
-
-
-# create PublicClient and WalletClient
-# pass clients to the vault.py
-# check if transaction methods should return a transaction or function
 
 
 class PublicClient:
@@ -47,13 +42,12 @@ class WalletClient(PublicClient):
 
         return await function.build_transaction(transaction_payload)
 
-    async def send_transaction(self, transaction: TxParams) -> HexBytes:
-        gas = await self.w3.eth.estimate_gas(transaction)
-        print(gas)
+    async def send_transaction(self, transaction: TxParams) -> HexStr:
+        await self.w3.eth.estimate_gas(transaction)  # validates transaction
         signed_transaction = self.w3.eth.account.sign_transaction(
             transaction, self.account.key
         )
-        print(signed_transaction)
-        return await self.w3.eth.send_raw_transaction(
+        tx_hash = await self.w3.eth.send_raw_transaction(
             signed_transaction.raw_transaction
         )
+        return tx_hash.to_0x_hex()
