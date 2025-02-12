@@ -1,4 +1,4 @@
-from typing import TypedDict, Callable, Any
+from typing import Callable, Any, Tuple
 from web3.types import ChecksumAddress, HexStr, TxParams
 from web3.constants import ADDRESS_ZERO
 from eth_abi import encode, decode
@@ -44,18 +44,17 @@ def make_create_and_use(action: int, encoder: Callable | None = None) -> Callabl
         initialization_data: HexStr,
         action_args: Any,
     ) -> TxParams:
-        call_args = CallArgs(
-            external_position_proxy=ADDRESS_ZERO,
-            action_id=action,
-            action_args="0x" if encoder is None else encoder(action_args),
-        )
         return await create(
             client,
             type_id,
             comptroller_proxy,
             external_position_manager,
             initialization_data,
-            call_encode(call_args),
+            call_encode(
+                ADDRESS_ZERO,
+                action,
+                "0x" if encoder is None else encoder(action_args),
+            ),
         )
 
     return create_and_use
@@ -81,29 +80,27 @@ CALL_ENCODING = [
 ]
 
 
-class CallArgs(TypedDict):
-    external_position_proxy: ChecksumAddress
-    action_id: int
-    action_args: HexStr = "0x"
-
-
-def call_encode(args: CallArgs) -> HexStr:
+def call_encode(
+    external_position_proxy: ChecksumAddress,
+    action_id: int,
+    action_args: HexStr = "0x",
+) -> HexStr:
     types = [e["type"] for e in CALL_ENCODING]
     values = [
-        args["external_position_proxy"],
-        args["action_id"],
-        Web3.to_bytes(hexstr=args["action_args"]),
+        external_position_proxy,
+        action_id,
+        Web3.to_bytes(hexstr=action_args),
     ]
     return encode(types, values)
 
 
-def call_decode(encoded: HexStr) -> CallArgs:
-    [external_position_proxy, action_id, action_args] = decode(CALL_ENCODING, encoded)
-    return CallArgs(
-        external_position_proxy=external_position_proxy,
-        action_id=action_id,
-        action_args=action_args,
-    )
+def call_decode(encoded: HexStr) -> Tuple[ChecksumAddress, int, HexStr]:
+    """
+    Returns:
+        (external_position_proxy, action_id, action_args)
+    """
+    types = [e["type"] for e in CALL_ENCODING]
+    return decode(types, encoded)
 
 
 async def call(
@@ -114,17 +111,12 @@ async def call(
     action_id: int,
     action_args: HexStr = "0x",
 ) -> TxParams:
-    call_args = CallArgs(
-        external_position_proxy=external_position_proxy,
-        action_id=action_id,
-        action_args=action_args,
-    )
     return await call_extension(
         client,
         comptroller_proxy,
         external_position_manager,
         ACTION["call_on_external_position"],
-        call_encode(call_args),
+        call_encode(external_position_proxy, action_id, action_args),
     )
 
 
@@ -148,29 +140,27 @@ CREATE_ENCODING = [
 ]
 
 
-class CreateArgs(TypedDict):
-    type_id: int
-    initialization_data: HexStr = "0x"
-    call_on_external_position_call_args: HexStr = "0x"
-
-
-def create_encode(args: CreateArgs) -> HexStr:
+def create_encode(
+    type_id: int,
+    initialization_data: HexStr = "0x",
+    call_on_external_position_call_args: HexStr = "0x",
+) -> HexStr:
     types = [e["type"] for e in CREATE_ENCODING]
     values = [
-        args["type_id"],
-        Web3.to_bytes(hexstr=args["initialization_data"]),
-        Web3.to_bytes(hexstr=args["call_on_external_position_call_args"]),
+        type_id,
+        Web3.to_bytes(hexstr=initialization_data),
+        Web3.to_bytes(hexstr=call_on_external_position_call_args),
     ]
     return encode(types, values)
 
 
-def create_decode(encoded: HexStr) -> CreateArgs:
-    decoded = decode(CREATE_ENCODING, Web3.to_bytes(hexstr=encoded))
-    return CreateArgs(
-        type_id=decoded[0],
-        initialization_data=Web3.to_hex(decoded[1]),
-        call_on_external_position_call_args=Web3.to_hex(decoded[2]),
-    )
+def create_decode(encoded: HexStr) -> Tuple[int, HexStr, HexStr]:
+    """
+    Returns:
+        (type_id, initialization_data, call_on_external_position_call_args)
+    """
+    types = [e["type"] for e in CREATE_ENCODING]
+    return decode(types, encoded)
 
 
 async def create(
@@ -181,17 +171,12 @@ async def create(
     initialization_data: HexStr = "0x",
     call_args: HexStr = "0x",
 ) -> TxParams:
-    create_args = CreateArgs(
-        type_id=type_id,
-        initialization_data=initialization_data,
-        call_on_external_position_call_args=call_args,
-    )
     return await call_extension(
         client,
         comptroller_proxy,
         external_position_manager,
         ACTION["create_external_position"],
-        create_encode(create_args),
+        create_encode(type_id, initialization_data, call_args),
     )
 
 
@@ -224,19 +209,19 @@ REACTIVATE_ENCODING = [
 ]
 
 
-class ReactivateArgs(TypedDict):
-    external_position: ChecksumAddress
-
-
-def reactivate_encode(args: ReactivateArgs) -> HexStr:
+def reactivate_encode(external_position: ChecksumAddress) -> HexStr:
     types = [e["type"] for e in REACTIVATE_ENCODING]
-    values = [args["external_position"]]
+    values = [external_position]
     return encode(types, values)
 
 
-def reactivate_decode(encoded: HexStr) -> ReactivateArgs:
-    decoded = decode(REACTIVATE_ENCODING, Web3.to_bytes(hexstr=encoded))
-    return ReactivateArgs(external_position=decoded[0])
+def reactivate_decode(encoded: HexStr) -> ChecksumAddress:
+    """
+    Returns:
+        external_position
+    """
+    types = [e["type"] for e in REACTIVATE_ENCODING]
+    return decode(types, encoded)
 
 
 async def reactivate(
@@ -245,13 +230,12 @@ async def reactivate(
     external_position_manager: ChecksumAddress,
     external_position_proxy: ChecksumAddress,
 ) -> TxParams:
-    reactivate_args = ReactivateArgs(external_position=external_position_proxy)
     return await call_extension(
         client,
         comptroller_proxy,
         external_position_manager,
         ACTION["reactivate_external_position"],
-        reactivate_encode(reactivate_args),
+        reactivate_encode(external_position_proxy),
     )
 
 
@@ -267,19 +251,19 @@ REMOVE_ENCODING = [
 ]
 
 
-class RemoveArgs(TypedDict):
-    external_position_proxy: ChecksumAddress
-
-
-def remove_encode(args: RemoveArgs) -> HexStr:
+def remove_encode(external_position_proxy: ChecksumAddress) -> HexStr:
     types = [e["type"] for e in REMOVE_ENCODING]
-    values = [args["external_position_proxy"]]
+    values = [external_position_proxy]
     return encode(types, values)
 
 
-def remove_decode(encoded: HexStr) -> RemoveArgs:
-    decoded = decode(REMOVE_ENCODING, Web3.to_bytes(hexstr=encoded))
-    return RemoveArgs(external_position_proxy=decoded[0])
+def remove_decode(encoded: HexStr) -> ChecksumAddress:
+    """
+    Returns:
+        external_position_proxy
+    """
+    types = [e["type"] for e in REMOVE_ENCODING]
+    return decode(types, encoded)
 
 
 async def remove(
@@ -288,11 +272,10 @@ async def remove(
     external_position_manager: ChecksumAddress,
     external_position_proxy: ChecksumAddress,
 ) -> TxParams:
-    remove_args = RemoveArgs(external_position_proxy=external_position_proxy)
     return await call_extension(
         client,
         comptroller_proxy,
         external_position_manager,
         ACTION["remove_external_position"],
-        remove_encode(remove_args),
+        remove_encode(external_position_proxy),
     )

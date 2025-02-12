@@ -1,7 +1,7 @@
 from web3 import Web3
 from web3.types import ChecksumAddress, HexStr, TxParams
 from eth_abi import encode, decode
-from typing import TypedDict, Callable, Any
+from typing import Callable, Any, Tuple
 from .extensions import call_extension
 from ..utils.clients import WalletClient
 
@@ -68,30 +68,27 @@ CALL_ENCODING = [
 ]
 
 
-class CallArgs(TypedDict):
-    function_selector: HexStr
-    integration_adapter: ChecksumAddress
-    call_args: HexStr = "0x"
-
-
-def call_encode(args: CallArgs) -> HexStr:
+def call_encode(
+    function_selector: HexStr,
+    integration_adapter: ChecksumAddress,
+    call_args: HexStr = "0x",
+) -> HexStr:
     types = [e["type"] for e in CALL_ENCODING]
     values = [
-        args["integration_adapter"],
-        args["function_selector"],
-        Web3.to_bytes(hexstr=args["call_args"]),
+        integration_adapter,
+        function_selector,
+        Web3.to_bytes(hexstr=call_args),
     ]
     return encode(types, values)
 
 
-def call_decode(encoded: HexStr) -> CallArgs:
+def call_decode(encoded: HexStr) -> Tuple[HexStr, ChecksumAddress, HexStr]:
+    """
+    Returns:
+        (function_selector, integration_adapter, call_args)
+    """
     types = [e["type"] for e in CALL_ENCODING]
-    decoded = decode(types, Web3.to_bytes(hexstr=encoded))
-    return CallArgs(
-        integration_adapter=decoded[0],
-        function_selector=Web3.to_hex(decoded[1]),
-        call_args=Web3.to_hex(decoded[2]),
-    )
+    return decode(types, Web3.to_bytes(hexstr=encoded))
 
 
 async def call(
@@ -102,17 +99,12 @@ async def call(
     function_selector: HexStr,
     call_args: HexStr = "0x",
 ) -> TxParams:
-    call_args = CallArgs(
-        integration_adapter=integration_adapter,
-        function_selector=function_selector,
-        call_args=call_args,
-    )
     return await call_extension(
         client,
         comptroller_proxy,
         integration_manager,
         ACTION["call_on_integration"],
-        call_encode(call_args),
+        call_encode(function_selector, integration_adapter, call_args),
     )
 
 
