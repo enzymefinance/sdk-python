@@ -6,7 +6,7 @@ from typing import Tuple
 from ..._internal import integration_manager
 from ..._internal import external_position_manager
 from ...utils.clients import PublicClient
-from ...utils.conversion import to_decimal
+from ...utils.conversion import from_wei
 from ... import Asset
 
 # --------------------------------------------------------------------------------------------
@@ -649,8 +649,8 @@ async def get_reserve_caps(
         Asset.get_decimals(client, asset),
     )
     return (
-        to_decimal(reserve_caps[0], decimals),
-        to_decimal(reserve_caps[1], decimals),
+        from_wei(reserve_caps[0], decimals),
+        from_wei(reserve_caps[1], decimals),
     )
 
 
@@ -673,7 +673,7 @@ async def get_available_supply_amount(
         get_reserve_caps(client, protocol_data_provider, asset),
         get_reserve_data(client, protocol_data_provider, asset),
     )
-    return reserve_caps[1] - to_decimal(reserve_data[2], decimals)
+    return reserve_caps[1] - from_wei(reserve_data[2], decimals)
 
 
 async def get_available_variable_debt_amount(
@@ -686,7 +686,7 @@ async def get_available_variable_debt_amount(
         get_reserve_caps(client, protocol_data_provider, asset),
         get_reserve_data(client, protocol_data_provider, asset),
     )
-    return reserve_caps[0] - to_decimal(reserve_data[4], decimals)
+    return reserve_caps[0] - from_wei(reserve_data[4], decimals)
 
 
 UI_INCENTIVE_DATA_PROVIDER_ABI = [
