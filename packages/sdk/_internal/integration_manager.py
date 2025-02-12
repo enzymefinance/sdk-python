@@ -1,7 +1,7 @@
 from web3 import Web3
 from web3.types import ChecksumAddress, HexStr, TxParams
 from eth_abi import encode, decode
-from typing import Callable, Any, Tuple
+from typing import Callable, Any, Tuple, Awaitable
 from .extensions import call_extension
 from ..utils.clients import WalletClient
 
@@ -28,7 +28,16 @@ SELECTOR = {
 }
 
 
-def make_use(selector: HexStr, encoder: Callable) -> Callable:
+def make_use(selector: HexStr, encoder: Callable) -> Callable[
+    [
+        WalletClient,
+        ChecksumAddress,  # comptroller_proxy
+        ChecksumAddress,  # integration_manager
+        ChecksumAddress,  # integration_adapter
+        Any,              # call_args (decoded parameters for the encoder function)
+    ],
+    Awaitable[TxParams]
+]:
     async def use_integration(
         client: WalletClient,
         comptroller_proxy: ChecksumAddress,

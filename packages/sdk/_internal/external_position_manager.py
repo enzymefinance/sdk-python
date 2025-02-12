@@ -1,4 +1,4 @@
-from typing import Callable, Any, Tuple
+from typing import Callable, Any, Tuple, Awaitable
 from web3.types import ChecksumAddress, HexStr, TxParams
 from web3.constants import ADDRESS_ZERO
 from eth_abi import encode, decode
@@ -15,7 +15,16 @@ ACTION = {
 }
 
 
-def make_use(action: int, encoder: Callable | None = None) -> Callable:
+def make_use(action: int, encoder: Callable | None = None) -> Callable[
+    [
+        WalletClient,
+        ChecksumAddress,
+        ChecksumAddress,
+        ChecksumAddress,
+        Any,
+    ],
+    Awaitable[TxParams]
+]:
     async def use_external_position(
         client: WalletClient,
         comptroller_proxy: ChecksumAddress,
@@ -35,7 +44,17 @@ def make_use(action: int, encoder: Callable | None = None) -> Callable:
     return use_external_position
 
 
-def make_create_and_use(action: int, encoder: Callable | None = None) -> Callable:
+def make_create_and_use(action: int, encoder: Callable | None = None) -> Callable[
+    [
+        WalletClient,
+        int,
+        ChecksumAddress,
+        ChecksumAddress,
+        HexStr,
+        Any,
+    ],
+    Awaitable[TxParams]
+]:
     async def create_and_use(
         client: WalletClient,
         type_id: int,
