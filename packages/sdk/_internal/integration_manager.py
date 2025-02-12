@@ -28,22 +28,13 @@ SELECTOR = {
 }
 
 
-def make_use(selector: HexStr, encoder: Callable) -> Callable[
-    [
-        WalletClient,
-        ChecksumAddress,  # comptroller_proxy
-        ChecksumAddress,  # integration_manager
-        ChecksumAddress,  # integration_adapter
-        Any,              # call_args (decoded parameters for the encoder function)
-    ],
-    Awaitable[TxParams]
-]:
+def make_use(selector: HexStr, encoder: Callable) -> Callable:
     async def use_integration(
         client: WalletClient,
         comptroller_proxy: ChecksumAddress,
         integration_manager: ChecksumAddress,
         integration_adapter: ChecksumAddress,
-        call_args: Any,
+        call_args: dict[str, Any],
     ) -> TxParams:
         return await call(
             client,
@@ -51,7 +42,7 @@ def make_use(selector: HexStr, encoder: Callable) -> Callable[
             integration_manager,
             integration_adapter,
             selector,
-            encoder(call_args),
+            encoder(**call_args),
         )
 
     return use_integration
@@ -85,19 +76,28 @@ def call_encode(
     types = [e["type"] for e in CALL_ENCODING]
     values = [
         integration_adapter,
-        function_selector,
+        Web3.to_bytes(hexstr=function_selector),
         Web3.to_bytes(hexstr=call_args),
     ]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
-def call_decode(encoded: HexStr) -> Tuple[HexStr, ChecksumAddress, HexStr]:
+def call_decode(encoded: HexStr) -> dict[str, HexStr | ChecksumAddress | HexStr]:
     """
     Returns:
-        (function_selector, integration_adapter, call_args)
+            {
+            "function_selector": HexStr,
+            "integration_adapter": ChecksumAddress,
+            "call_args": HexStr,
+        }
     """
     types = [e["type"] for e in CALL_ENCODING]
-    return decode(types, Web3.to_bytes(hexstr=encoded))
+    decoded = decode(types, Web3.to_bytes(hexstr=encoded))
+    return {
+        "function_selector": Web3.to_hex(decoded[0]),
+        "integration_adapter": decoded[1],
+        "call_args": Web3.to_hex(decoded[2]),
+    }
 
 
 async def call(
@@ -132,13 +132,21 @@ ADD_TRACKED_ASSETS_ENCODING = [
 def add_tracked_assets_encode(add_assets: list[ChecksumAddress]) -> HexStr:
     types = [e["type"] for e in ADD_TRACKED_ASSETS_ENCODING]
     values = [add_assets]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
-def add_tracked_assets_decode(encoded: HexStr) -> list[ChecksumAddress]:
+def add_tracked_assets_decode(encoded: HexStr) -> dict[str, list[ChecksumAddress]]:
+    """
+    Returns:
+        {
+            "assets": list[ChecksumAddress],
+        }
+    """
     types = [e["type"] for e in ADD_TRACKED_ASSETS_ENCODING]
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
-    return decoded[0]
+    return {
+        "assets": decoded[0],
+    }
 
 
 async def add_tracked_assets(
@@ -171,13 +179,21 @@ REMOVE_TRACKED_ASSETS_ENCODING = [
 def remove_tracked_assets_encode(remove_assets: list[ChecksumAddress]) -> HexStr:
     types = [e["type"] for e in REMOVE_TRACKED_ASSETS_ENCODING]
     values = [remove_assets]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
-def remove_tracked_assets_decode(encoded: HexStr) -> list[ChecksumAddress]:
+def remove_tracked_assets_decode(encoded: HexStr) -> dict[str, list[ChecksumAddress]]:
+    """
+    Returns:
+        {
+            "assets": list[ChecksumAddress],
+        }
+    """
     types = [e["type"] for e in REMOVE_TRACKED_ASSETS_ENCODING]
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
-    return decoded[0]
+    return {
+        "assets": decoded[0],
+    }
 
 
 async def remove_tracked_assets(

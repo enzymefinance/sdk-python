@@ -63,7 +63,7 @@ def encode_flash_loan_calls(
 ) -> HexStr:
     types = ["(address,bytes)[]"]
     args = [[[target, Web3.to_bytes(hexstr=data)] for target, data in calls]]
-    return "0x" + encode(types, args).hex()
+    return Web3.to_hex(encode(types, args))
 
 
 async def flash_loan(

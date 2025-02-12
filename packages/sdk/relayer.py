@@ -228,6 +228,30 @@ def encode_relay_call_data(
     approval_data: HexStr,
     gas_limit: int,
 ) -> HexStr:
+    """
+    Args:
+        relay_request:
+            {
+                "request": {
+                    "from": ChecksumAddress,
+                    "to": ChecksumAddress,
+                    "value": int,
+                    "gas": int,
+                    "nonce": int,
+                    "data": HexStr,
+                    "validUntil": int,
+                },
+                "relayData": {
+                    "gasPrice": int,
+                    "pctRelayFee": int,
+                    "baseRelayFee": int,
+                    "relayWorker": ChecksumAddress,
+                    "paymaster": ChecksumAddress,
+                    "forwarder": ChecksumAddress,
+                    "paymasterData": HexStr,
+                }
+            }
+    """
     contract = Web3().eth.contract(abi=RELAY_HUB_ABI)
     return contract.encode_abi(
         "relayCall",

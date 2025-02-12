@@ -43,7 +43,6 @@ class WalletClient(PublicClient):
         return await function.build_transaction(transaction_payload)
 
     async def send_transaction(self, transaction: TxParams) -> HexStr:
-        await self.w3.eth.estimate_gas(transaction)  # validates transaction
         signed_transaction = self.w3.eth.account.sign_transaction(
             transaction, self.account.key
         )

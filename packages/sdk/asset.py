@@ -1,7 +1,7 @@
 import asyncio
 from typing import List, Tuple
 from web3.types import ChecksumAddress, TxParams
-from utils.clients import WalletClient, PublicClient
+from .utils.clients import WalletClient, PublicClient
 
 
 # --------------------------------------------------------------------------------------------
@@ -27,15 +27,25 @@ async def approve(
 async def get_info(
     client: PublicClient,
     asset: ChecksumAddress,
-) -> Tuple[str, str, int]:
+) -> dict[str, str | int]:
     """
-    returns: (name, symbol, decimals)
+    Returns:
+        {
+            "name": str,
+            "symbol": str,
+            "decimals": int,
+        }
     """
-    return await asyncio.gather(
+    info = await asyncio.gather(
         get_name(client, asset),
         get_symbol(client, asset),
         get_decimals(client, asset),
     )
+    return {
+        "name": info[0],
+        "symbol": info[1],
+        "decimals": info[2],
+    }
 
 
 async def get_name(
@@ -69,10 +79,27 @@ async def get_balances_of(
     client: PublicClient,
     owner: ChecksumAddress,
     assets: List[ChecksumAddress],
-) -> List[int]:
-    return await asyncio.gather(
+) -> List[dict[ChecksumAddress, int]]:
+    """
+    Returns:
+        [
+            {
+                "asset": ChecksumAddress,
+                "balance": int,
+            },
+            ...
+        ]
+    """
+    balances = await asyncio.gather(
         *[get_balance_of(client, owner, asset) for asset in assets],
     )
+    return [
+        {
+            "asset": assets[i],
+            "balance": balances[i],
+        }
+        for i in range(len(assets))
+    ]
 
 
 async def get_allowance(
@@ -110,4 +137,6 @@ async def get_canonical_value(
 ) -> int:
     # TODO: simulate contract?
     contract = client.contract(value_interpreter, "IValueInterpreter")
-    return await contract.functions.calcCanonicalAssetValue(base_asset, amount, quote_asset).call()
+    return await contract.functions.calcCanonicalAssetValue(
+        base_asset, amount, quote_asset
+    ).call()

@@ -1,17 +1,38 @@
 import asyncio
 from decimal import Decimal
 from eth_abi import encode, decode
-from web3.types import ChecksumAddress, HexStr
+from web3.types import ChecksumAddress, HexStr, TxParams
+from web3 import Web3
 from typing import Tuple
-from ..._internal import integration_manager
-from ..._internal import external_position_manager
-from ...utils.clients import PublicClient
+from ..._internal import integration_manager as integration_manager_lib
+from ..._internal import external_position_manager as external_position_manager_lib
+from ...utils.clients import PublicClient, WalletClient
 from ...utils.conversion import from_wei
-from ... import Asset
+from ... import asset as asset_lib
 
 # --------------------------------------------------------------------------------------------
 # LEND
 # --------------------------------------------------------------------------------------------
+
+
+async def lend(*args) -> TxParams:
+    """
+    Args:
+        client: WalletClient
+        comptroller_proxy: ChecksumAddress
+        integration_manager: ChecksumAddress
+        integration_adapter: ChecksumAddress
+        call_args: dict[str, ChecksumAddress | int]
+            {
+                "a_token": ChecksumAddress,
+                "deposit_amount": int,
+            }
+    """
+    _lend = integration_manager_lib.make_use(
+        integration_manager_lib.SELECTOR["lend"], lend_encode
+    )
+    return await _lend(*args)
+
 
 LEND_ENCODING = [
     {
@@ -28,24 +49,48 @@ LEND_ENCODING = [
 def lend_encode(a_token: ChecksumAddress, deposit_amount: int) -> HexStr:
     types = [e["type"] for e in LEND_ENCODING]
     values = [a_token, deposit_amount]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
-def lend_decode(encoded: HexStr) -> Tuple[ChecksumAddress, int]:
+def lend_decode(encoded: HexStr) -> dict[str, ChecksumAddress | int]:
     """
     Returns:
-        (a_token, deposit_amount)
+        {
+            "a_token": ChecksumAddress,
+            "deposit_amount": int,
+        }
     """
     types = [e["type"] for e in LEND_ENCODING]
-    return decode(types, encoded)
-
-
-lend = integration_manager.make_use(integration_manager.SELECTOR["lend"], lend_encode)
+    decoded = decode(types, Web3.to_bytes(hexstr=encoded))
+    return {
+        "a_token": decoded[0],
+        "deposit_amount": decoded[1],
+    }
 
 
 # --------------------------------------------------------------------------------------------
 # REDEEM
 # --------------------------------------------------------------------------------------------
+
+
+async def redeem(*args) -> TxParams:
+    """
+    Args:
+        client: WalletClient
+        comptroller_proxy: ChecksumAddress
+        integration_manager: ChecksumAddress
+        integration_adapter: ChecksumAddress
+        call_args: dict[str, ChecksumAddress | int]
+            {
+                "a_token": ChecksumAddress,
+                "redeem_amount": int,
+            }
+    """
+    _redeem = integration_manager_lib.make_use(
+        integration_manager_lib.SELECTOR["redeem"], redeem_encode
+    )
+    return await _redeem(*args)
+
 
 REDEEM_ENCODING = [
     {
@@ -62,21 +107,23 @@ REDEEM_ENCODING = [
 def redeem_encode(a_token: ChecksumAddress, redeem_amount: int) -> HexStr:
     types = [e["type"] for e in REDEEM_ENCODING]
     values = [a_token, redeem_amount]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
-def redeem_decode(encoded: HexStr) -> Tuple[ChecksumAddress, int]:
+def redeem_decode(encoded: HexStr) -> dict[str, ChecksumAddress | int]:
     """
     Returns:
-        (a_token, redeem_amount)
+        {
+            "a_token": ChecksumAddress,
+            "redeem_amount": int,
+        }
     """
     types = [e["type"] for e in REDEEM_ENCODING]
-    return decode(types, encoded)
-
-
-redeem = integration_manager.make_use(
-    integration_manager.SELECTOR["redeem"], redeem_encode
-)
+    decoded = decode(types, Web3.to_bytes(hexstr=encoded))
+    return {
+        "a_token": decoded[0],
+        "redeem_amount": decoded[1],
+    }
 
 
 # --------------------------------------------------------------------------------------------
@@ -94,12 +141,53 @@ ACTION = {
     "sweep": 7,
 }
 
-create = external_position_manager.create_only
+create = external_position_manager_lib.create_only
 
 
 # --------------------------------------------------------------------------------------------
 # ADD COLLATERAL
 # --------------------------------------------------------------------------------------------
+
+
+async def add_collateral(*args) -> TxParams:
+    """
+    Args:
+        client: WalletClient
+        comptroller_proxy: ChecksumAddress
+        external_position_manager: ChecksumAddress
+        external_position_proxy: ChecksumAddress
+        call_args: dict[str, list[ChecksumAddress] | list[int] | bool]
+            {
+                "a_tokens": list[ChecksumAddress],
+                "amounts": list[int],
+                "from_underlying": bool,
+            }
+    """
+    _add_collateral = external_position_manager_lib.make_use(
+        ACTION["add_collateral"], add_collateral_encode
+    )
+    return await _add_collateral(*args)
+
+
+async def create_and_add_collateral(*args) -> TxParams:
+    """
+    Args:
+        client: WalletClient
+        comptroller_proxy: ChecksumAddress
+        external_position_manager: ChecksumAddress
+        external_position_proxy: ChecksumAddress
+        call_args: dict[str, list[ChecksumAddress] | list[int] | bool]
+            {
+                "a_tokens": list[ChecksumAddress],
+                "amounts": list[int],
+                "from_underlying": bool,
+            }
+    """
+    _create_and_add_collateral = external_position_manager_lib.make_create_and_use(
+        ACTION["add_collateral"], add_collateral_encode
+    )
+    return await _create_and_add_collateral(*args)
+
 
 ADD_COLLATERAL_ENCODING = [
     {
@@ -122,31 +210,53 @@ def add_collateral_encode(
 ) -> HexStr:
     types = [e["type"] for e in ADD_COLLATERAL_ENCODING]
     values = [a_tokens, amounts, from_underlying]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
 def add_collateral_decode(
     encoded: HexStr,
-) -> Tuple[list[ChecksumAddress], list[int], bool]:
+) -> dict[str, list[ChecksumAddress] | list[int] | bool]:
     """
     Returns:
-        (a_tokens, amounts, from_underlying)
+        {
+            "a_tokens": list[ChecksumAddress],
+            "amounts": list[int],
+            "from_underlying": bool,
+        }
     """
     types = [e["type"] for e in ADD_COLLATERAL_ENCODING]
-    return decode(types, encoded)
-
-
-add_collateral = external_position_manager.make_use(
-    ACTION["add_collateral"], add_collateral_encode
-)
-create_and_add_collateral = external_position_manager.make_create_and_use(
-    ACTION["add_collateral"], add_collateral_encode
-)
+    decoded = decode(types, Web3.to_bytes(hexstr=encoded))
+    return {
+        "a_tokens": decoded[0],
+        "amounts": decoded[1],
+        "from_underlying": decoded[2],
+    }
 
 
 # --------------------------------------------------------------------------------------------
 # REMOVE COLLATERAL
 # --------------------------------------------------------------------------------------------
+
+
+async def remove_collateral(*args) -> TxParams:
+    """
+    Args:
+        client: WalletClient
+        comptroller_proxy: ChecksumAddress
+        external_position_manager: ChecksumAddress
+        external_position_proxy: ChecksumAddress
+        call_args: dict[str, list[ChecksumAddress] | list[int] | bool]
+            {
+                "a_tokens": list[ChecksumAddress],
+                "amounts": list[int],
+                "to_underlying": bool,
+            }
+    """
+    _remove_collateral = external_position_manager_lib.make_use(
+        ACTION["remove_collateral"], remove_collateral_encode
+    )
+    return await _remove_collateral(*args)
+
 
 REMOVE_COLLATERAL_ENCODING = [
     {
@@ -169,28 +279,69 @@ def remove_collateral_encode(
 ) -> HexStr:
     types = [e["type"] for e in REMOVE_COLLATERAL_ENCODING]
     values = [a_tokens, amounts, to_underlying]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
 def remove_collateral_decode(
     encoded: HexStr,
-) -> Tuple[list[ChecksumAddress], list[int], bool]:
+) -> dict[str, list[ChecksumAddress] | list[int] | bool]:
     """
     Returns:
-        (a_tokens, amounts, to_underlying)
+        {
+            "a_tokens": list[ChecksumAddress],
+            "amounts": list[int],
+            "to_underlying": bool,
+        }
     """
     types = [e["type"] for e in REMOVE_COLLATERAL_ENCODING]
-    return decode(types, encoded)
-
-
-remove_collateral = external_position_manager.make_use(
-    ACTION["remove_collateral"], remove_collateral_encode
-)
+    decoded = decode(types, Web3.to_bytes(hexstr=encoded))
+    return {
+        "a_tokens": decoded[0],
+        "amounts": decoded[1],
+        "to_underlying": decoded[2],
+    }
 
 
 # --------------------------------------------------------------------------------------------
 # BORROW
 # --------------------------------------------------------------------------------------------
+
+
+async def borrow(*args) -> TxParams:
+    """
+    Args:
+        client: WalletClient
+        comptroller_proxy: ChecksumAddress
+        external_position_manager: ChecksumAddress
+        external_position_proxy: ChecksumAddress
+        call_args: dict[str, list[ChecksumAddress] | list[int]]
+            {
+                "underlying_tokens": list[ChecksumAddress],
+                "amounts": list[int],
+            }
+    """
+    _borrow = external_position_manager_lib.make_use(ACTION["borrow"], borrow_encode)
+    return await _borrow(*args)
+
+
+async def create_and_borrow(*args) -> TxParams:
+    """
+    Args:
+        client: WalletClient
+        comptroller_proxy: ChecksumAddress
+        external_position_manager: ChecksumAddress
+        external_position_proxy: ChecksumAddress
+        call_args: dict[str, list[ChecksumAddress] | list[int]]
+            {
+                "underlying_tokens": list[ChecksumAddress],
+                "amounts": list[int],
+            }
+    """
+    _create_and_borrow = external_position_manager_lib.make_create_and_use(
+        ACTION["borrow"], borrow_encode
+    )
+    return await _create_and_borrow(*args)
+
 
 BORROW_ENCODING = [
     {
@@ -209,27 +360,48 @@ def borrow_encode(
 ) -> HexStr:
     types = [e["type"] for e in BORROW_ENCODING]
     values = [underlying_tokens, amounts]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
-def borrow_decode(encoded: HexStr) -> Tuple[list[ChecksumAddress], list[int]]:
+def borrow_decode(encoded: HexStr) -> dict[str, list[ChecksumAddress] | list[int]]:
     """
     Returns:
-        (underlying_tokens, amounts)
+        {
+            "underlying_tokens": list[ChecksumAddress],
+            "amounts": list[int],
+        }
     """
     types = [e["type"] for e in BORROW_ENCODING]
-    return decode(types, encoded)
-
-
-borrow = external_position_manager.make_use(ACTION["borrow"], borrow_encode)
-create_and_borrow = external_position_manager.make_create_and_use(
-    ACTION["borrow"], borrow_encode
-)
+    decoded = decode(types, Web3.to_bytes(hexstr=encoded))
+    return {
+        "underlying_tokens": decoded[0],
+        "amounts": decoded[1],
+    }
 
 
 # --------------------------------------------------------------------------------------------
 # REPAY BORROW
 # --------------------------------------------------------------------------------------------
+
+
+async def repay_borrow(*args) -> TxParams:
+    """
+    Args:
+        client: WalletClient
+        comptroller_proxy: ChecksumAddress
+        external_position_manager: ChecksumAddress
+        external_position_proxy: ChecksumAddress
+        call_args: dict[str, list[ChecksumAddress] | list[int]]
+            {
+                "underlying_tokens": list[ChecksumAddress],
+                "amounts": list[int],
+            }
+    """
+    _repay_borrow = external_position_manager_lib.make_use(
+        ACTION["repay_borrow"], repay_borrow_encode
+    )
+    return await _repay_borrow(*args)
+
 
 REPAY_BORROW_ENCODING = [
     {
@@ -248,26 +420,49 @@ def repay_borrow_encode(
 ) -> HexStr:
     types = [e["type"] for e in REPAY_BORROW_ENCODING]
     values = [underlying_tokens, amounts]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
-def repay_borrow_decode(encoded: HexStr) -> Tuple[list[ChecksumAddress], list[int]]:
+def repay_borrow_decode(
+    encoded: HexStr,
+) -> dict[str, list[ChecksumAddress] | list[int]]:
     """
     Returns:
-        (underlying_tokens, amounts)
+        {
+            "underlying_tokens": list[ChecksumAddress],
+            "amounts": list[int],
+        }
     """
     types = [e["type"] for e in REPAY_BORROW_ENCODING]
-    return decode(types, encoded)
-
-
-repay_borrow = external_position_manager.make_use(
-    ACTION["repay_borrow"], repay_borrow_encode
-)
+    decoded = decode(types, Web3.to_bytes(hexstr=encoded))
+    return {
+        "underlying_tokens": decoded[0],
+        "amounts": decoded[1],
+    }
 
 
 # --------------------------------------------------------------------------------------------
 # SET E-MODE
 # --------------------------------------------------------------------------------------------
+
+
+async def set_e_mode(*args) -> TxParams:
+    """
+    Args:
+        client: WalletClient
+        comptroller_proxy: ChecksumAddress
+        external_position_manager: ChecksumAddress
+        external_position_proxy: ChecksumAddress
+        call_args: dict[str, int]
+            {
+                "category_id": int,
+            }
+    """
+    _set_e_mode = external_position_manager_lib.make_use(
+        ACTION["set_e_mode"], set_e_mode_encode
+    )
+    return await _set_e_mode(*args)
+
 
 SET_EMODE_ENCODING = [
     {
@@ -280,24 +475,46 @@ SET_EMODE_ENCODING = [
 def set_e_mode_encode(category_id: int) -> HexStr:
     types = [e["type"] for e in SET_EMODE_ENCODING]
     values = [category_id]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
-def set_e_mode_decode(encoded: HexStr) -> int:
+def set_e_mode_decode(encoded: HexStr) -> dict[str, int]:
     """
     Returns:
-        category_id
+        {
+            "category_id": int,
+        }
     """
     types = [e["type"] for e in SET_EMODE_ENCODING]
-    decoded = decode(types, encoded)
-    return decoded[0]
+    decoded = decode(types, Web3.to_bytes(hexstr=encoded))
+    return {
+        "category_id": decoded[0],
+    }
 
-
-set_e_mode = external_position_manager.make_use(ACTION["set_e_mode"], set_e_mode_encode)
 
 # --------------------------------------------------------------------------------------------
 # SET USE RESERVE AS COLLATERAL
 # --------------------------------------------------------------------------------------------
+
+
+async def set_use_reserve_as_collateral(*args) -> TxParams:
+    """
+    Args:
+        client: WalletClient
+        comptroller_proxy: ChecksumAddress
+        external_position_manager: ChecksumAddress
+        external_position_proxy: ChecksumAddress
+        call_args: dict[str, ChecksumAddress | bool]
+            {
+                "underlying": ChecksumAddress,
+                "use_as_collateral": bool,
+            }
+    """
+    _set_use_reserve_as_collateral = external_position_manager_lib.make_use(
+        ACTION["set_use_reserve_as_collateral"], set_use_reserve_as_collateral_encode
+    )
+    return await _set_use_reserve_as_collateral(*args)
+
 
 SET_USE_RESERVE_AS_COLLATERAL_ENCODING = [
     {
@@ -316,28 +533,51 @@ def set_use_reserve_as_collateral_encode(
 ) -> HexStr:
     types = [e["type"] for e in SET_USE_RESERVE_AS_COLLATERAL_ENCODING]
     values = [underlying, use_as_collateral]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
 def set_use_reserve_as_collateral_decode(
     encoded: HexStr,
-) -> Tuple[ChecksumAddress, bool]:
+) -> dict[str, ChecksumAddress | bool]:
     """
     Returns:
-        (underlying, use_as_collateral)
+        {
+            "underlying": ChecksumAddress,
+            "use_as_collateral": bool,
+        }
     """
     types = [e["type"] for e in SET_USE_RESERVE_AS_COLLATERAL_ENCODING]
-    return decode(types, encoded)
-
-
-set_use_reserve_as_collateral = external_position_manager.make_use(
-    ACTION["set_use_reserve_as_collateral"], set_use_reserve_as_collateral_encode
-)
+    decoded = decode(types, Web3.to_bytes(hexstr=encoded))
+    return {
+        "underlying": decoded[0],
+        "use_as_collateral": decoded[1],
+    }
 
 
 # --------------------------------------------------------------------------------------------
 # CLAIM REWARDS
 # --------------------------------------------------------------------------------------------
+
+
+async def claim_rewards(*args) -> TxParams:
+    """
+    Args:
+        client: WalletClient
+        comptroller_proxy: ChecksumAddress
+        external_position_manager: ChecksumAddress
+        external_position_proxy: ChecksumAddress
+        call_args: dict[str, list[ChecksumAddress] | int | ChecksumAddress]
+            {
+                "assets": list[ChecksumAddress],
+                "amount": int,
+                "reward_token": ChecksumAddress,
+            }
+    """
+    _claim_rewards = external_position_manager_lib.make_use(
+        ACTION["claim_rewards"], claim_rewards_encode
+    )
+    return await _claim_rewards(*args)
+
 
 CLAIM_REWARDS_ENCODING = [
     {
@@ -360,28 +600,49 @@ def claim_rewards_encode(
 ) -> HexStr:
     types = [e["type"] for e in CLAIM_REWARDS_ENCODING]
     values = [assets, amount, reward_token]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
 def claim_rewards_decode(
     encoded: HexStr,
-) -> Tuple[list[ChecksumAddress], int, ChecksumAddress]:
+) -> dict[str, list[ChecksumAddress] | int | ChecksumAddress]:
     """
     Returns:
-        (assets, amount, reward_token)
+        {
+            "assets": list[ChecksumAddress],
+            "amount": int,
+            "reward_token": ChecksumAddress,
+        }
     """
     types = [e["type"] for e in CLAIM_REWARDS_ENCODING]
-    return decode(types, encoded)
-
-
-claim_rewards = external_position_manager.make_use(
-    ACTION["claim_rewards"], claim_rewards_encode
-)
+    decoded = decode(types, Web3.to_bytes(hexstr=encoded))
+    return {
+        "assets": decoded[0],
+        "amount": decoded[1],
+        "reward_token": decoded[2],
+    }
 
 
 # --------------------------------------------------------------------------------------------
 # SWEEP
 # --------------------------------------------------------------------------------------------
+
+
+async def sweep(*args) -> TxParams:
+    """
+    Args:
+        client: WalletClient
+        comptroller_proxy: ChecksumAddress
+        external_position_manager: ChecksumAddress
+        external_position_proxy: ChecksumAddress
+        call_args: dict[str, list[ChecksumAddress]]
+            {
+                "assets": list[ChecksumAddress],
+            }
+    """
+    _sweep = external_position_manager_lib.make_use(ACTION["sweep"], sweep_encode)
+    return await _sweep(*args)
+
 
 SWEEP_ENCODING = [
     {
@@ -394,19 +655,22 @@ SWEEP_ENCODING = [
 def sweep_encode(assets: list[ChecksumAddress]) -> HexStr:
     types = [e["type"] for e in SWEEP_ENCODING]
     values = [assets]
-    return encode(types, values)
+    return Web3.to_hex(encode(types, values))
 
 
-def sweep_decode(encoded: HexStr) -> list[ChecksumAddress]:
+def sweep_decode(encoded: HexStr) -> dict[str, list[ChecksumAddress]]:
     """
     Returns:
-        assets
+        {
+            "assets": list[ChecksumAddress],
+        }
     """
     types = [e["type"] for e in SWEEP_ENCODING]
-    return decode(types, encoded)
+    decoded = decode(types, Web3.to_bytes(hexstr=encoded))
+    return {
+        "assets": decoded[0],
+    }
 
-
-sweep = external_position_manager.make_use(ACTION["sweep"], sweep_encode)
 
 # --------------------------------------------------------------------------------------------
 # THIRD PARTY READ FUNCTIONS
@@ -499,6 +763,16 @@ async def get_e_mode_category_data(
     pool: ChecksumAddress,
     category_id: int,
 ) -> Tuple[int, int, int, ChecksumAddress, str]:
+    """
+    Returns:
+        (
+            ltv: int,
+            liquidation_threshold: int,
+            liquidation_bonus: int,
+            price_source: ChecksumAddress,
+            label: str,
+        )
+    """
     contract = client.contract(pool, POOL_ABI)
     return await contract.functions.getEModeCategoryData(category_id).call()
 
@@ -508,6 +782,17 @@ async def get_user_account_data(
     pool: ChecksumAddress,
     user: ChecksumAddress,
 ) -> Tuple[int, int, int, int, int, int]:
+    """
+    Returns:
+        (
+            total_collateral_base: int,
+            total_debt_base: int,
+            available_borrows_base: int,
+            current_liquidation_threshold: int,
+            ltv: int,
+            health_factor: int,
+        )
+    """
     contract = client.contract(pool, POOL_ABI)
     return await contract.functions.getUserAccountData(user).call()
 
@@ -565,6 +850,13 @@ async def get_all_user_rewards(
     assets: list[ChecksumAddress],
     user: ChecksumAddress,
 ) -> Tuple[list[ChecksumAddress], list[int]]:
+    """
+    Returns:
+        (
+            rewards_list: list[ChecksumAddress],
+            unclaimed_amounts: list[int],
+        )
+    """
     contract = client.contract(rewards_controller, REWARDS_CONTROLLER_ABI)
     return await contract.functions.getAllUserRewards(assets, user).call()
 
@@ -574,6 +866,10 @@ async def get_rewards_by_asset(
     rewards_controller: ChecksumAddress,
     asset: ChecksumAddress,
 ) -> list[ChecksumAddress]:
+    """
+    Returns:
+        rewards_list: list[ChecksumAddress]
+    """
     contract = client.contract(rewards_controller, REWARDS_CONTROLLER_ABI)
     return await contract.functions.getRewardsByAsset(asset).call()
 
@@ -584,6 +880,15 @@ async def get_rewards_data(
     asset: ChecksumAddress,
     reward: ChecksumAddress,
 ) -> Tuple[int, int, int, int]:
+    """
+    Returns:
+        (
+            index: int,
+            emission_per_second: int,
+            last_update_timestamp: int,
+            distribution_end: int,
+        )
+    """
     contract = client.contract(rewards_controller, REWARDS_CONTROLLER_ABI)
     return await contract.functions.getRewardsData(asset, reward).call()
 
@@ -593,8 +898,8 @@ PROTOCOL_DATA_PROVIDER_ABI = [
         "inputs": [{"internalType": "address", "name": "asset", "type": "address"}],
         "name": "getReserveCaps",
         "outputs": [
-            {"internalType": "uint256", "name": "borrowCap", "type": "uint256"},
             {"internalType": "uint256", "name": "supplyCap", "type": "uint256"},
+            {"internalType": "uint256", "name": "borrowCap", "type": "uint256"},
         ],
         "stateMutability": "view",
         "type": "function",
@@ -643,10 +948,17 @@ async def get_reserve_caps(
     protocol_data_provider: ChecksumAddress,
     asset: ChecksumAddress,
 ) -> Tuple[Decimal, Decimal]:
+    """
+    Returns:
+        (
+            supply_cap: Decimal,
+            borrow_cap: Decimal,
+        )
+    """
     contract = client.contract(protocol_data_provider, PROTOCOL_DATA_PROVIDER_ABI)
     reserve_caps, decimals = await asyncio.gather(
         contract.functions.getReserveCaps(asset).call(),
-        Asset.get_decimals(client, asset),
+        asset_lib.get_decimals(client, asset),
     )
     return (
         from_wei(reserve_caps[0], decimals),
@@ -659,6 +971,23 @@ async def get_reserve_data(
     protocol_data_provider: ChecksumAddress,
     asset: ChecksumAddress,
 ) -> Tuple[int, int, int, int, int, int, int, int, int, int, int]:
+    """
+    Returns:
+        (
+            unbacked: int,
+            accrued_to_treasury_scaled: int,
+            total_a_token: int,
+            total_stable_debt: int,
+            total_variable_debt: int,
+            liquidity_rate: int,
+            variable_borrow_rate: int,
+            stable_borrow_rate: int,
+            average_stable_borrow_rate: int,
+            liquidity_index: int,
+            variable_borrow_index: int,
+            last_update_timestamp: int,
+        )
+    """
     contract = client.contract(protocol_data_provider, PROTOCOL_DATA_PROVIDER_ABI)
     return await contract.functions.getReserveData(asset).call()
 
