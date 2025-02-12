@@ -6,8 +6,9 @@ from web3 import Web3
 from typing import Tuple
 from ..._internal import integration_manager as integration_manager_lib
 from ..._internal import external_position_manager as external_position_manager_lib
-from ...utils.clients import PublicClient, WalletClient
+from ...utils.clients import PublicClient
 from ...utils.conversion import from_wei
+from ...utils.encoding import encoding_to_types
 from ... import asset as asset_lib
 
 # --------------------------------------------------------------------------------------------
@@ -47,7 +48,7 @@ LEND_ENCODING = [
 
 
 def lend_encode(a_token: ChecksumAddress, deposit_amount: int) -> HexStr:
-    types = [e["type"] for e in LEND_ENCODING]
+    types = encoding_to_types(LEND_ENCODING)
     values = [a_token, deposit_amount]
     return Web3.to_hex(encode(types, values))
 
@@ -60,10 +61,10 @@ def lend_decode(encoded: HexStr) -> dict[str, ChecksumAddress | int]:
             "deposit_amount": int,
         }
     """
-    types = [e["type"] for e in LEND_ENCODING]
+    types = encoding_to_types(LEND_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
-        "a_token": decoded[0],
+        "a_token": Web3.to_checksum_address(decoded[0]),
         "deposit_amount": decoded[1],
     }
 
@@ -105,7 +106,7 @@ REDEEM_ENCODING = [
 
 
 def redeem_encode(a_token: ChecksumAddress, redeem_amount: int) -> HexStr:
-    types = [e["type"] for e in REDEEM_ENCODING]
+    types = encoding_to_types(REDEEM_ENCODING)
     values = [a_token, redeem_amount]
     return Web3.to_hex(encode(types, values))
 
@@ -118,10 +119,10 @@ def redeem_decode(encoded: HexStr) -> dict[str, ChecksumAddress | int]:
             "redeem_amount": int,
         }
     """
-    types = [e["type"] for e in REDEEM_ENCODING]
+    types = encoding_to_types(REDEEM_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
-        "a_token": decoded[0],
+        "a_token": Web3.to_checksum_address(decoded[0]),
         "redeem_amount": decoded[1],
     }
 
@@ -208,7 +209,7 @@ ADD_COLLATERAL_ENCODING = [
 def add_collateral_encode(
     a_tokens: list[ChecksumAddress], amounts: list[int], from_underlying: bool
 ) -> HexStr:
-    types = [e["type"] for e in ADD_COLLATERAL_ENCODING]
+    types = encoding_to_types(ADD_COLLATERAL_ENCODING)
     values = [a_tokens, amounts, from_underlying]
     return Web3.to_hex(encode(types, values))
 
@@ -224,10 +225,10 @@ def add_collateral_decode(
             "from_underlying": bool,
         }
     """
-    types = [e["type"] for e in ADD_COLLATERAL_ENCODING]
+    types = encoding_to_types(ADD_COLLATERAL_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
-        "a_tokens": decoded[0],
+        "a_tokens": [Web3.to_checksum_address(a_token) for a_token in decoded[0]],
         "amounts": decoded[1],
         "from_underlying": decoded[2],
     }
@@ -277,7 +278,7 @@ REMOVE_COLLATERAL_ENCODING = [
 def remove_collateral_encode(
     a_tokens: list[ChecksumAddress], amounts: list[int], to_underlying: bool
 ) -> HexStr:
-    types = [e["type"] for e in REMOVE_COLLATERAL_ENCODING]
+    types = encoding_to_types(REMOVE_COLLATERAL_ENCODING)
     values = [a_tokens, amounts, to_underlying]
     return Web3.to_hex(encode(types, values))
 
@@ -293,10 +294,10 @@ def remove_collateral_decode(
             "to_underlying": bool,
         }
     """
-    types = [e["type"] for e in REMOVE_COLLATERAL_ENCODING]
+    types = encoding_to_types(REMOVE_COLLATERAL_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
-        "a_tokens": decoded[0],
+        "a_tokens": [Web3.to_checksum_address(a_token) for a_token in decoded[0]],
         "amounts": decoded[1],
         "to_underlying": decoded[2],
     }
@@ -358,7 +359,7 @@ BORROW_ENCODING = [
 def borrow_encode(
     underlying_tokens: list[ChecksumAddress], amounts: list[int]
 ) -> HexStr:
-    types = [e["type"] for e in BORROW_ENCODING]
+    types = encoding_to_types(BORROW_ENCODING)
     values = [underlying_tokens, amounts]
     return Web3.to_hex(encode(types, values))
 
@@ -371,10 +372,13 @@ def borrow_decode(encoded: HexStr) -> dict[str, list[ChecksumAddress] | list[int
             "amounts": list[int],
         }
     """
-    types = [e["type"] for e in BORROW_ENCODING]
+    types = encoding_to_types(BORROW_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
-        "underlying_tokens": decoded[0],
+        "underlying_tokens": [
+            Web3.to_checksum_address(underlying_token)
+            for underlying_token in decoded[0]
+        ],
         "amounts": decoded[1],
     }
 
@@ -418,7 +422,7 @@ REPAY_BORROW_ENCODING = [
 def repay_borrow_encode(
     underlying_tokens: list[ChecksumAddress], amounts: list[int]
 ) -> HexStr:
-    types = [e["type"] for e in REPAY_BORROW_ENCODING]
+    types = encoding_to_types(REPAY_BORROW_ENCODING)
     values = [underlying_tokens, amounts]
     return Web3.to_hex(encode(types, values))
 
@@ -433,10 +437,13 @@ def repay_borrow_decode(
             "amounts": list[int],
         }
     """
-    types = [e["type"] for e in REPAY_BORROW_ENCODING]
+    types = encoding_to_types(REPAY_BORROW_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
-        "underlying_tokens": decoded[0],
+        "underlying_tokens": [
+            Web3.to_checksum_address(underlying_token)
+            for underlying_token in decoded[0]
+        ],
         "amounts": decoded[1],
     }
 
@@ -473,7 +480,7 @@ SET_EMODE_ENCODING = [
 
 
 def set_e_mode_encode(category_id: int) -> HexStr:
-    types = [e["type"] for e in SET_EMODE_ENCODING]
+    types = encoding_to_types(SET_EMODE_ENCODING)
     values = [category_id]
     return Web3.to_hex(encode(types, values))
 
@@ -485,7 +492,7 @@ def set_e_mode_decode(encoded: HexStr) -> dict[str, int]:
             "category_id": int,
         }
     """
-    types = [e["type"] for e in SET_EMODE_ENCODING]
+    types = encoding_to_types(SET_EMODE_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
         "category_id": decoded[0],
@@ -531,7 +538,7 @@ SET_USE_RESERVE_AS_COLLATERAL_ENCODING = [
 def set_use_reserve_as_collateral_encode(
     underlying: ChecksumAddress, use_as_collateral: bool
 ) -> HexStr:
-    types = [e["type"] for e in SET_USE_RESERVE_AS_COLLATERAL_ENCODING]
+    types = encoding_to_types(SET_USE_RESERVE_AS_COLLATERAL_ENCODING)
     values = [underlying, use_as_collateral]
     return Web3.to_hex(encode(types, values))
 
@@ -546,7 +553,7 @@ def set_use_reserve_as_collateral_decode(
             "use_as_collateral": bool,
         }
     """
-    types = [e["type"] for e in SET_USE_RESERVE_AS_COLLATERAL_ENCODING]
+    types = encoding_to_types(SET_USE_RESERVE_AS_COLLATERAL_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
         "underlying": decoded[0],
@@ -598,7 +605,7 @@ CLAIM_REWARDS_ENCODING = [
 def claim_rewards_encode(
     assets: list[ChecksumAddress], amount: int, reward_token: ChecksumAddress
 ) -> HexStr:
-    types = [e["type"] for e in CLAIM_REWARDS_ENCODING]
+    types = encoding_to_types(CLAIM_REWARDS_ENCODING)
     values = [assets, amount, reward_token]
     return Web3.to_hex(encode(types, values))
 
@@ -614,12 +621,12 @@ def claim_rewards_decode(
             "reward_token": ChecksumAddress,
         }
     """
-    types = [e["type"] for e in CLAIM_REWARDS_ENCODING]
+    types = encoding_to_types(CLAIM_REWARDS_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
-        "assets": decoded[0],
+        "assets": [Web3.to_checksum_address(asset) for asset in decoded[0]],
         "amount": decoded[1],
-        "reward_token": decoded[2],
+        "reward_token": Web3.to_checksum_address(decoded[2]),
     }
 
 
@@ -653,7 +660,7 @@ SWEEP_ENCODING = [
 
 
 def sweep_encode(assets: list[ChecksumAddress]) -> HexStr:
-    types = [e["type"] for e in SWEEP_ENCODING]
+    types = encoding_to_types(SWEEP_ENCODING)
     values = [assets]
     return Web3.to_hex(encode(types, values))
 
@@ -665,10 +672,10 @@ def sweep_decode(encoded: HexStr) -> dict[str, list[ChecksumAddress]]:
             "assets": list[ChecksumAddress],
         }
     """
-    types = [e["type"] for e in SWEEP_ENCODING]
+    types = encoding_to_types(SWEEP_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
-        "assets": decoded[0],
+        "assets": [Web3.to_checksum_address(asset) for asset in decoded[0]],
     }
 
 

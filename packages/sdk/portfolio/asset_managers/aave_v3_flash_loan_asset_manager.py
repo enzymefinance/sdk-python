@@ -2,6 +2,7 @@ from web3 import Web3
 from web3.types import ChecksumAddress, HexStr, TxParams
 from eth_abi import encode
 from ...utils.clients import PublicClient, WalletClient
+from ...utils.encoding import encoding_to_types
 from ....abis import abis
 
 
@@ -14,7 +15,7 @@ def encode_deploy_proxy_construct_data(
     owner: ChecksumAddress,
     borrowed_assets_recipient: ChecksumAddress,
 ) -> HexStr:
-    abi = abis.fetch("IAaveV3FlashLoanAssetManager")
+    abi = abis.get("IAaveV3FlashLoanAssetManager")
     contract = Web3().eth.contract(abi=abi)
     return contract.encode_abi(
         "init",
@@ -61,7 +62,7 @@ FLASH_LOAN_CALLS_ENCODING = [
 def encode_flash_loan_calls(
     calls: list[ChecksumAddress, HexStr],
 ) -> HexStr:
-    types = ["(address,bytes)[]"]
+    types = encoding_to_types(FLASH_LOAN_CALLS_ENCODING)
     args = [[[target, Web3.to_bytes(hexstr=data)] for target, data in calls]]
     return Web3.to_hex(encode(types, args))
 

@@ -4,7 +4,7 @@ from pathlib import Path
 
 _cache = {}
 
-def fetch(name: str) -> dict:
+def get(name: str) -> dict:
     if name in _cache:
         return _cache[name]
 

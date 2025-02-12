@@ -1,9 +1,10 @@
-from typing import Callable, Any, Tuple, Awaitable
+from typing import Callable, Any
 from web3.types import ChecksumAddress, HexStr, TxParams
 from web3.constants import ADDRESS_ZERO
 from eth_abi import encode, decode
 from web3 import Web3
 from ..utils.clients import WalletClient
+from ..utils.encoding import encoding_to_types
 from .extensions import call_extension
 
 
@@ -85,7 +86,7 @@ def call_encode(
     action_id: int,
     action_args: HexStr = "0x",
 ) -> HexStr:
-    types = [e["type"] for e in CALL_ENCODING]
+    types = encoding_to_types(CALL_ENCODING)
     values = [
         external_position_proxy,
         action_id,
@@ -103,10 +104,10 @@ def call_decode(encoded: HexStr) -> dict[str, ChecksumAddress | int | HexStr]:
             "action_args": HexStr,
         }
     """
-    types = [e["type"] for e in CALL_ENCODING]
+    types = encoding_to_types(CALL_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
-        "external_position_proxy": decoded[0],
+        "external_position_proxy": Web3.to_checksum_address(decoded[0]),
         "action_id": decoded[1],
         "action_args": Web3.to_hex(decoded[2]),
     }
@@ -154,7 +155,7 @@ def create_encode(
     initialization_data: HexStr = "0x",
     call_on_external_position_call_args: HexStr = "0x",
 ) -> HexStr:
-    types = [e["type"] for e in CREATE_ENCODING]
+    types = encoding_to_types(CREATE_ENCODING)
     values = [
         type_id,
         Web3.to_bytes(hexstr=initialization_data),
@@ -172,7 +173,7 @@ def create_decode(encoded: HexStr) -> dict[str, int | HexStr | HexStr]:
             "call_on_external_position_call_args": HexStr,
         }
     """
-    types = [e["type"] for e in CREATE_ENCODING]
+    types = encoding_to_types(CREATE_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
         "type_id": decoded[0],
@@ -228,7 +229,7 @@ REACTIVATE_ENCODING = [
 
 
 def reactivate_encode(external_position: ChecksumAddress) -> HexStr:
-    types = [e["type"] for e in REACTIVATE_ENCODING]
+    types = encoding_to_types(REACTIVATE_ENCODING)
     values = [external_position]
     return Web3.to_hex(encode(types, values))
 
@@ -240,10 +241,10 @@ def reactivate_decode(encoded: HexStr) -> dict[str, ChecksumAddress]:
             "external_position": ChecksumAddress,
         }
     """
-    types = [e["type"] for e in REACTIVATE_ENCODING]
+    types = encoding_to_types(REACTIVATE_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
-        "external_position": decoded[0],
+        "external_position": Web3.to_checksum_address(decoded[0]),
     }
 
 
@@ -275,7 +276,7 @@ REMOVE_ENCODING = [
 
 
 def remove_encode(external_position_proxy: ChecksumAddress) -> HexStr:
-    types = [e["type"] for e in REMOVE_ENCODING]
+    types = encoding_to_types(REMOVE_ENCODING)
     values = [external_position_proxy]
     return Web3.to_hex(encode(types, values))
 
@@ -287,10 +288,10 @@ def remove_decode(encoded: HexStr) -> dict[str, ChecksumAddress]:
             "external_position_proxy": ChecksumAddress,
         }
     """
-    types = [e["type"] for e in REMOVE_ENCODING]
+    types = encoding_to_types(REMOVE_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
-        "external_position_proxy": decoded[0],
+        "external_position_proxy": Web3.to_checksum_address(decoded[0]),
     }
 
 

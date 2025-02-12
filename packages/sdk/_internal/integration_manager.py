@@ -1,9 +1,10 @@
 from web3 import Web3
 from web3.types import ChecksumAddress, HexStr, TxParams
 from eth_abi import encode, decode
-from typing import Callable, Any, Tuple, Awaitable
+from typing import Callable, Any
 from .extensions import call_extension
 from ..utils.clients import WalletClient
+from ..utils.encoding import encoding_to_types
 
 
 ACTION = {
@@ -73,7 +74,7 @@ def call_encode(
     integration_adapter: ChecksumAddress,
     call_args: HexStr = "0x",
 ) -> HexStr:
-    types = [e["type"] for e in CALL_ENCODING]
+    types = encoding_to_types(CALL_ENCODING)
     values = [
         integration_adapter,
         Web3.to_bytes(hexstr=function_selector),
@@ -91,7 +92,7 @@ def call_decode(encoded: HexStr) -> dict[str, HexStr | ChecksumAddress | HexStr]
             "call_args": HexStr,
         }
     """
-    types = [e["type"] for e in CALL_ENCODING]
+    types = encoding_to_types(CALL_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
         "function_selector": Web3.to_hex(decoded[0]),
@@ -130,7 +131,7 @@ ADD_TRACKED_ASSETS_ENCODING = [
 
 
 def add_tracked_assets_encode(add_assets: list[ChecksumAddress]) -> HexStr:
-    types = [e["type"] for e in ADD_TRACKED_ASSETS_ENCODING]
+    types = encoding_to_types(ADD_TRACKED_ASSETS_ENCODING)
     values = [add_assets]
     return Web3.to_hex(encode(types, values))
 
@@ -142,7 +143,7 @@ def add_tracked_assets_decode(encoded: HexStr) -> dict[str, list[ChecksumAddress
             "assets": list[ChecksumAddress],
         }
     """
-    types = [e["type"] for e in ADD_TRACKED_ASSETS_ENCODING]
+    types = encoding_to_types(ADD_TRACKED_ASSETS_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
         "assets": decoded[0],
@@ -177,7 +178,7 @@ REMOVE_TRACKED_ASSETS_ENCODING = [
 
 
 def remove_tracked_assets_encode(remove_assets: list[ChecksumAddress]) -> HexStr:
-    types = [e["type"] for e in REMOVE_TRACKED_ASSETS_ENCODING]
+    types = encoding_to_types(REMOVE_TRACKED_ASSETS_ENCODING)
     values = [remove_assets]
     return Web3.to_hex(encode(types, values))
 
@@ -189,7 +190,7 @@ def remove_tracked_assets_decode(encoded: HexStr) -> dict[str, list[ChecksumAddr
             "assets": list[ChecksumAddress],
         }
     """
-    types = [e["type"] for e in REMOVE_TRACKED_ASSETS_ENCODING]
+    types = encoding_to_types(REMOVE_TRACKED_ASSETS_ENCODING)
     decoded = decode(types, Web3.to_bytes(hexstr=encoded))
     return {
         "assets": decoded[0],

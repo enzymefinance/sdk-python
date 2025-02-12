@@ -14,7 +14,7 @@ class PublicClient:
 
     def contract(self, address: str, abi_name: str) -> AsyncContract:
         if address not in self._contracts:
-            abi = abis.fetch(abi_name)
+            abi = abis.get(abi_name)
             self._contracts[address] = self.w3.eth.contract(address=address, abi=abi)
         return self._contracts[address]
 
