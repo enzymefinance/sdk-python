@@ -15,8 +15,8 @@ async def take_order(*args) -> TxParams:
     Args:
         client: WalletClient
         comptroller_proxy: ChecksumAddress
-        external_position_manager: ChecksumAddress
-        external_position_proxy: ChecksumAddress
+        integration_manager: ChecksumAddress
+        integration_adapter: ChecksumAddress
         call_args: dict[str, Any]
             {
                 "executor": ChecksumAddress,
