@@ -157,7 +157,7 @@ async def add_collateral(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        call_args: dict[str, list[ChecksumAddress] | list[int] | bool]
+        action_args: dict[str, list[ChecksumAddress] | list[int] | bool]
             {
                 "a_tokens": list[ChecksumAddress],
                 "amounts": list[int],
@@ -174,10 +174,11 @@ async def create_and_add_collateral(*args) -> TxParams:
     """
     Args:
         client: WalletClient
+        type_id: int
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
-        external_position_proxy: ChecksumAddress
-        call_args: dict[str, list[ChecksumAddress] | list[int] | bool]
+        initialization_data: HexStr
+        action_args: dict[str, list[ChecksumAddress] | list[int] | bool]
             {
                 "a_tokens": list[ChecksumAddress],
                 "amounts": list[int],
@@ -246,7 +247,7 @@ async def remove_collateral(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        call_args: dict[str, list[ChecksumAddress] | list[int] | bool]
+        action_args: dict[str, list[ChecksumAddress] | list[int] | bool]
             {
                 "a_tokens": list[ChecksumAddress],
                 "amounts": list[int],
@@ -315,7 +316,7 @@ async def borrow(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        call_args: dict[str, list[ChecksumAddress] | list[int]]
+        action_args: dict[str, list[ChecksumAddress] | list[int]]
             {
                 "underlying_tokens": list[ChecksumAddress],
                 "amounts": list[int],
@@ -329,10 +330,11 @@ async def create_and_borrow(*args) -> TxParams:
     """
     Args:
         client: WalletClient
+        type_id: int
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
-        external_position_proxy: ChecksumAddress
-        call_args: dict[str, list[ChecksumAddress] | list[int]]
+        initialization_data: HexStr
+        action_args: dict[str, list[ChecksumAddress] | list[int]]
             {
                 "underlying_tokens": list[ChecksumAddress],
                 "amounts": list[int],
@@ -395,7 +397,7 @@ async def repay_borrow(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        call_args: dict[str, list[ChecksumAddress] | list[int]]
+        action_args: dict[str, list[ChecksumAddress] | list[int]]
             {
                 "underlying_tokens": list[ChecksumAddress],
                 "amounts": list[int],
@@ -460,7 +462,7 @@ async def set_e_mode(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        call_args: dict[str, int]
+        action_args: dict[str, int]
             {
                 "category_id": int,
             }
@@ -511,7 +513,7 @@ async def set_use_reserve_as_collateral(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        call_args: dict[str, ChecksumAddress | bool]
+        action_args: dict[str, ChecksumAddress | bool]
             {
                 "underlying": ChecksumAddress,
                 "use_as_collateral": bool,
@@ -573,7 +575,7 @@ async def claim_rewards(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        call_args: dict[str, list[ChecksumAddress] | int | ChecksumAddress]
+        action_args: dict[str, list[ChecksumAddress] | int | ChecksumAddress]
             {
                 "assets": list[ChecksumAddress],
                 "amount": int,
@@ -642,7 +644,7 @@ async def sweep(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        call_args: dict[str, list[ChecksumAddress]]
+        action_args: dict[str, list[ChecksumAddress]]
             {
                 "assets": list[ChecksumAddress],
             }
