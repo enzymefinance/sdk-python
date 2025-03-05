@@ -94,7 +94,8 @@ async def get_name(
     vault_proxy: ChecksumAddress,
 ) -> str:
     contract = client.contract(vault_proxy, "IVaultLib")
-    return await contract.functions.name().call()
+    function = contract.functions.name()
+    return await function.call()
 
 
 async def get_symbol(
@@ -102,7 +103,8 @@ async def get_symbol(
     vault_proxy: ChecksumAddress,
 ) -> str:
     contract = client.contract(vault_proxy, "IVaultLib")
-    return await contract.functions.symbol().call()
+    function = contract.functions.symbol()
+    return await function.call()
 
 
 async def get_owner(
@@ -110,7 +112,8 @@ async def get_owner(
     vault_proxy: ChecksumAddress,
 ) -> ChecksumAddress:
     contract = client.contract(vault_proxy, "IVaultLib")
-    return await contract.functions.getOwner().call()
+    function = contract.functions.getOwner()
+    return await function.call()
 
 
 async def get_nominated_owner(
@@ -118,7 +121,8 @@ async def get_nominated_owner(
     vault: ChecksumAddress,
 ) -> ChecksumAddress:
     contract = client.contract(vault, "IVaultLib")
-    return await contract.functions.getNominatedOwner().call()
+    function = contract.functions.getNominatedOwner()
+    return await function.call()
 
 
 async def get_denomination_asset(
@@ -126,7 +130,8 @@ async def get_denomination_asset(
     comptroller_proxy: ChecksumAddress,
 ) -> ChecksumAddress:
     contract = client.contract(comptroller_proxy, "IComptrollerLib")
-    return await contract.functions.getDenominationAsset().call()
+    function = contract.functions.getDenominationAsset()
+    return await function.call()
 
 
 async def get_comptroller_proxy(
@@ -134,7 +139,8 @@ async def get_comptroller_proxy(
     vault_proxy: ChecksumAddress,
 ) -> ChecksumAddress:
     contract = client.contract(vault_proxy, "IVaultLib")
-    return await contract.functions.getAccessor().call()
+    function = contract.functions.getAccessor()
+    return await function.call()
 
 
 async def get_policy_manager(
@@ -142,7 +148,8 @@ async def get_policy_manager(
     comptroller_proxy: ChecksumAddress,
 ) -> ChecksumAddress:
     contract = client.contract(comptroller_proxy, "IComptrollerLib")
-    return await contract.functions.getPolicyManager().call()
+    function = contract.functions.getPolicyManager()
+    return await function.call()
 
 
 async def get_fee_manager(
@@ -150,7 +157,8 @@ async def get_fee_manager(
     comptroller_proxy: ChecksumAddress,
 ) -> ChecksumAddress:
     contract = client.contract(comptroller_proxy, "IComptrollerLib")
-    return await contract.functions.getFeeManager().call()
+    function = contract.functions.getFeeManager()
+    return await function.call()
 
 
 async def shares_are_freely_transferable(
@@ -158,7 +166,8 @@ async def shares_are_freely_transferable(
     vault_proxy: ChecksumAddress,
 ) -> bool:
     contract = client.contract(vault_proxy, "IVaultLib")
-    return await contract.functions.sharesAreFreelyTransferable().call()
+    function = contract.functions.sharesAreFreelyTransferable()
+    return await function.call()
 
 
 async def get_fund_deployer(
@@ -166,4 +175,5 @@ async def get_fund_deployer(
     vault_proxy: ChecksumAddress,
 ) -> ChecksumAddress:
     contract = client.contract(vault_proxy, "IVaultLib")
-    return await contract.functions.getFundDeployer().call()
+    function = contract.functions.getFundDeployer()
+    return await function.call()

@@ -16,7 +16,8 @@ async def approve(
     amount: int,
 ) -> TxParams:
     contract = client.contract(asset, "IERC20")
-    return await contract.functions.approve(spender, amount).call()
+    function = contract.functions.approve(spender, amount)
+    return await function.call()
 
 
 # --------------------------------------------------------------------------------------------
@@ -54,7 +55,8 @@ async def get_name(
 ) -> str:
     # TODO: Handle case where name is a bytes32
     contract = client.contract(asset, "IERC20")
-    return await contract.functions.name().call()
+    function = contract.functions.name()
+    return await function.call()
 
 
 async def get_symbol(
@@ -63,7 +65,8 @@ async def get_symbol(
 ) -> str:
     # TODO: Handle case where symbol is a bytes32
     contract = client.contract(asset, "IERC20")
-    return await contract.functions.symbol().call()
+    function = contract.functions.symbol()
+    return await function.call()
 
 
 async def get_balance_of(
@@ -72,7 +75,8 @@ async def get_balance_of(
     asset: ChecksumAddress,
 ) -> int:
     contract = client.contract(asset, "IERC20")
-    return await contract.functions.balanceOf(owner).call()
+    function = contract.functions.balanceOf(owner)
+    return await function.call()
 
 
 async def get_balances_of(
@@ -109,7 +113,8 @@ async def get_allowance(
     spender: ChecksumAddress,
 ) -> int:
     contract = client.contract(asset, "IERC20")
-    return await contract.functions.allowance(owner, spender).call()
+    function = contract.functions.allowance(owner, spender)
+    return await function.call()
 
 
 async def get_decimals(
@@ -117,7 +122,8 @@ async def get_decimals(
     asset: ChecksumAddress,
 ) -> int:
     contract = client.contract(asset, "IERC20")
-    return await contract.functions.decimals().call()
+    function = contract.functions.decimals()
+    return await function.call()
 
 
 async def get_total_supply(
@@ -125,7 +131,8 @@ async def get_total_supply(
     asset: ChecksumAddress,
 ) -> int:
     contract = client.contract(asset, "IERC20")
-    return await contract.functions.totalSupply().call()
+    function = contract.functions.totalSupply()
+    return await function.call()
 
 
 async def get_canonical_value(
@@ -137,6 +144,7 @@ async def get_canonical_value(
 ) -> int:
     # TODO: simulate contract?
     contract = client.contract(value_interpreter, "IValueInterpreter")
-    return await contract.functions.calcCanonicalAssetValue(
+    function = contract.functions.calcCanonicalAssetValue(
         base_asset, amount, quote_asset
-    ).call()
+    )
+    return await function.call()

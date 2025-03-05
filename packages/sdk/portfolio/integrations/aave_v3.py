@@ -702,7 +702,8 @@ async def get_pool(
     pool_address_provider: ChecksumAddress,
 ) -> ChecksumAddress:
     contract = client.contract(pool_address_provider, POOL_ADDRESS_PROVIDER_ABI)
-    return await contract.functions.getPool().call()
+    function = contract.functions.getPool()
+    return await function.call()
 
 
 POOL_ABI = [
@@ -783,7 +784,8 @@ async def get_e_mode_category_data(
         )
     """
     contract = client.contract(pool, POOL_ABI)
-    return await contract.functions.getEModeCategoryData(category_id).call()
+    function = contract.functions.getEModeCategoryData(category_id)
+    return await function.call()
 
 
 async def get_user_account_data(
@@ -803,7 +805,8 @@ async def get_user_account_data(
         )
     """
     contract = client.contract(pool, POOL_ABI)
-    return await contract.functions.getUserAccountData(user).call()
+    function = contract.functions.getUserAccountData(user)
+    return await function.call()
 
 
 REWARDS_CONTROLLER_ABI = [
@@ -867,7 +870,8 @@ async def get_all_user_rewards(
         )
     """
     contract = client.contract(rewards_controller, REWARDS_CONTROLLER_ABI)
-    return await contract.functions.getAllUserRewards(assets, user).call()
+    function = contract.functions.getAllUserRewards(assets, user)
+    return await function.call()
 
 
 async def get_rewards_by_asset(
@@ -880,7 +884,8 @@ async def get_rewards_by_asset(
         rewards_list: list[ChecksumAddress]
     """
     contract = client.contract(rewards_controller, REWARDS_CONTROLLER_ABI)
-    return await contract.functions.getRewardsByAsset(asset).call()
+    function = contract.functions.getRewardsByAsset(asset)
+    return await function.call()
 
 
 async def get_rewards_data(
@@ -899,7 +904,8 @@ async def get_rewards_data(
         )
     """
     contract = client.contract(rewards_controller, REWARDS_CONTROLLER_ABI)
-    return await contract.functions.getRewardsData(asset, reward).call()
+    function = contract.functions.getRewardsData(asset, reward)
+    return await function.call()
 
 
 PROTOCOL_DATA_PROVIDER_ABI = [
@@ -965,8 +971,9 @@ async def get_reserve_caps(
         )
     """
     contract = client.contract(protocol_data_provider, PROTOCOL_DATA_PROVIDER_ABI)
+    function = contract.functions.getReserveCaps(asset)
     reserve_caps, decimals = await asyncio.gather(
-        contract.functions.getReserveCaps(asset).call(),
+        function.call(),
         asset_lib.get_decimals(client, asset),
     )
     return (
@@ -998,7 +1005,8 @@ async def get_reserve_data(
         )
     """
     contract = client.contract(protocol_data_provider, PROTOCOL_DATA_PROVIDER_ABI)
-    return await contract.functions.getReserveData(asset).call()
+    function = contract.functions.getReserveData(asset)
+    return await function.call()
 
 
 async def get_available_supply_amount(
@@ -1218,6 +1226,5 @@ async def get_reserves_incentives_data(
     contract = client.contract(
         ui_incentive_data_provider, UI_INCENTIVE_DATA_PROVIDER_ABI
     )
-    return await contract.functions.getReservesIncentivesData(
-        pool_address_provider
-    ).call()
+    function = contract.functions.getReservesIncentivesData(pool_address_provider)
+    return await function.call()

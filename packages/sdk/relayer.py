@@ -184,7 +184,8 @@ async def is_relayer_enabled(
     comptroller_proxy: ChecksumAddress,
 ) -> bool:
     contract = client.contract(comptroller_proxy, "IComptrollerLib")
-    gas_relay_paymaster_address = await contract.functions.getGasRelayPaymaster().call()
+    function = contract.functions.getGasRelayPaymaster()
+    gas_relay_paymaster_address = await function.call()
     return gas_relay_paymaster_address != ADDRESS_ZERO
 
 
@@ -193,7 +194,8 @@ async def get_gas_relay_paymaster(
     comptroller_proxy: ChecksumAddress,
 ) -> ChecksumAddress:
     contract = client.contract(comptroller_proxy, "IComptrollerLib")
-    return await contract.functions.getGasRelayPaymaster().call()
+    function = contract.functions.getGasRelayPaymaster()
+    return await function.call()
 
 
 async def get_relayer_balance(
@@ -201,7 +203,8 @@ async def get_relayer_balance(
     gas_relay_paymaster: ChecksumAddress,
 ) -> int:
     contract = client.contract(gas_relay_paymaster, "IGasRelayPaymasterLib")
-    return await contract.functions.getRelayHubDeposit().call()
+    function = contract.functions.getRelayHubDeposit()
+    return await function.call()
 
 
 async def get_trusted_forwarder(
@@ -209,7 +212,8 @@ async def get_trusted_forwarder(
     gas_relay_paymaster: ChecksumAddress,
 ) -> ChecksumAddress:
     contract = client.contract(gas_relay_paymaster, "IGasRelayPaymasterLib")
-    return await contract.functions.trustedForwarder().call()
+    function = contract.functions.trustedForwarder()
+    return await function.call()
 
 
 async def get_nonce(
@@ -218,7 +222,8 @@ async def get_nonce(
     sender: ChecksumAddress,
 ) -> int:
     contract = client.contract(trusted_forwarder, "IForwarder")
-    return await contract.functions.getNonce(sender).call()
+    function = contract.functions.getNonce(sender)
+    return await function.call()
 
 
 def encode_relay_call_data(
