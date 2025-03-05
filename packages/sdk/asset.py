@@ -1,5 +1,5 @@
 import asyncio
-from typing import List, Tuple
+from typing import List, TypedDict
 from web3.types import ChecksumAddress, TxParams
 from .utils.clients import WalletClient, PublicClient
 
@@ -7,6 +7,13 @@ from .utils.clients import WalletClient, PublicClient
 # --------------------------------------------------------------------------------------------
 # TRANSACTIONS
 # --------------------------------------------------------------------------------------------
+
+
+class ApproveParams(TypedDict):
+    client: WalletClient
+    asset: ChecksumAddress
+    spender: ChecksumAddress
+    amount: int
 
 
 async def approve(

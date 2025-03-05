@@ -52,6 +52,13 @@ TAKE_ORDER_ENCODING = [
 ]
 
 
+class TakeOrderArgs(TypedDict):
+    path_addresses: list[ChecksumAddress]
+    path_fees: list[int]
+    outgoing_asset_amount: int
+    min_incoming_asset_amount: int
+
+
 def take_order_encode(
     path_addresses: list[ChecksumAddress],
     path_fees: list[int],

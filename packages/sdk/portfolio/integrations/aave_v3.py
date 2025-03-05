@@ -3,7 +3,7 @@ from decimal import Decimal
 from eth_abi import encode, decode
 from web3.types import ChecksumAddress, HexStr, TxParams
 from web3 import Web3
-from typing import Tuple
+from typing import Tuple, TypedDict
 from ..._internal import integration_manager as integration_manager_lib
 from ..._internal import external_position_manager as external_position_manager_lib
 from ...utils.clients import PublicClient
@@ -45,6 +45,11 @@ LEND_ENCODING = [
         "name": "depositAmount",
     },
 ]
+
+
+class LendArgs(TypedDict):
+    a_token: ChecksumAddress
+    deposit_amount: int
 
 
 def lend_encode(a_token: ChecksumAddress, deposit_amount: int) -> HexStr:
@@ -105,6 +110,11 @@ REDEEM_ENCODING = [
 ]
 
 
+class RedeemArgs(TypedDict):
+    a_token: ChecksumAddress
+    redeem_amount: int
+
+
 def redeem_encode(a_token: ChecksumAddress, redeem_amount: int) -> HexStr:
     types = encoding_to_types(REDEEM_ENCODING)
     values = [a_token, redeem_amount]
@@ -130,6 +140,18 @@ def redeem_decode(encoded: HexStr) -> dict[str, ChecksumAddress | int]:
 # --------------------------------------------------------------------------------------------
 # EXTERNAL POSITION
 # --------------------------------------------------------------------------------------------
+
+
+class Action(TypedDict):
+    add_collateral: int
+    remove_collateral: int
+    borrow: int
+    repay_borrow: int
+    set_e_mode: int
+    set_use_reserve_as_collateral: int
+    claim_rewards: int
+    sweep: int
+
 
 ACTION = {
     "add_collateral": 0,
@@ -157,7 +179,7 @@ async def add_collateral(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        action_args: dict[str, list[ChecksumAddress] | list[int] | bool]
+        call_args: dict[str, list[ChecksumAddress] | list[int] | bool]
             {
                 "a_tokens": list[ChecksumAddress],
                 "amounts": list[int],
@@ -178,7 +200,7 @@ async def create_and_add_collateral(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         initialization_data: HexStr
-        action_args: dict[str, list[ChecksumAddress] | list[int] | bool]
+        call_args: dict[str, list[ChecksumAddress] | list[int] | bool]
             {
                 "a_tokens": list[ChecksumAddress],
                 "amounts": list[int],
@@ -205,6 +227,12 @@ ADD_COLLATERAL_ENCODING = [
         "name": "fromUnderlying",
     },
 ]
+
+
+class AddCollateralArgs(TypedDict):
+    a_tokens: list[ChecksumAddress]
+    amounts: list[int]
+    from_underlying: bool
 
 
 def add_collateral_encode(
@@ -247,7 +275,7 @@ async def remove_collateral(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        action_args: dict[str, list[ChecksumAddress] | list[int] | bool]
+        call_args: dict[str, list[ChecksumAddress] | list[int] | bool]
             {
                 "a_tokens": list[ChecksumAddress],
                 "amounts": list[int],
@@ -274,6 +302,12 @@ REMOVE_COLLATERAL_ENCODING = [
         "name": "toUnderlying",
     },
 ]
+
+
+class RemoveCollateralArgs(TypedDict):
+    a_tokens: list[ChecksumAddress]
+    amounts: list[int]
+    to_underlying: bool
 
 
 def remove_collateral_encode(
@@ -316,7 +350,7 @@ async def borrow(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        action_args: dict[str, list[ChecksumAddress] | list[int]]
+        call_args: dict[str, list[ChecksumAddress] | list[int]]
             {
                 "underlying_tokens": list[ChecksumAddress],
                 "amounts": list[int],
@@ -334,7 +368,7 @@ async def create_and_borrow(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         initialization_data: HexStr
-        action_args: dict[str, list[ChecksumAddress] | list[int]]
+        call_args: dict[str, list[ChecksumAddress] | list[int]]
             {
                 "underlying_tokens": list[ChecksumAddress],
                 "amounts": list[int],
@@ -356,6 +390,11 @@ BORROW_ENCODING = [
         "name": "amounts",
     },
 ]
+
+
+class BorrowArgs(TypedDict):
+    underlying_tokens: list[ChecksumAddress]
+    amounts: list[int]
 
 
 def borrow_encode(
@@ -397,7 +436,7 @@ async def repay_borrow(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        action_args: dict[str, list[ChecksumAddress] | list[int]]
+        call_args: dict[str, list[ChecksumAddress] | list[int]]
             {
                 "underlying_tokens": list[ChecksumAddress],
                 "amounts": list[int],
@@ -419,6 +458,11 @@ REPAY_BORROW_ENCODING = [
         "name": "amounts",
     },
 ]
+
+
+class RepayBorrowArgs(TypedDict):
+    underlying_tokens: list[ChecksumAddress]
+    amounts: list[int]
 
 
 def repay_borrow_encode(
@@ -462,7 +506,7 @@ async def set_e_mode(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        action_args: dict[str, int]
+        call_args: dict[str, int]
             {
                 "category_id": int,
             }
@@ -479,6 +523,10 @@ SET_EMODE_ENCODING = [
         "name": "categoryId",
     },
 ]
+
+
+class SetEModeArgs(TypedDict):
+    category_id: int
 
 
 def set_e_mode_encode(category_id: int) -> HexStr:
@@ -513,7 +561,7 @@ async def set_use_reserve_as_collateral(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        action_args: dict[str, ChecksumAddress | bool]
+        call_args: dict[str, ChecksumAddress | bool]
             {
                 "underlying": ChecksumAddress,
                 "use_as_collateral": bool,
@@ -535,6 +583,11 @@ SET_USE_RESERVE_AS_COLLATERAL_ENCODING = [
         "name": "useAsCollateral",
     },
 ]
+
+
+class SetUseReserveAsCollateralArgs(TypedDict):
+    underlying: ChecksumAddress
+    use_as_collateral: bool
 
 
 def set_use_reserve_as_collateral_encode(
@@ -575,7 +628,7 @@ async def claim_rewards(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        action_args: dict[str, list[ChecksumAddress] | int | ChecksumAddress]
+        call_args: dict[str, list[ChecksumAddress] | int | ChecksumAddress]
             {
                 "assets": list[ChecksumAddress],
                 "amount": int,
@@ -602,6 +655,12 @@ CLAIM_REWARDS_ENCODING = [
         "name": "rewardToken",
     },
 ]
+
+
+class ClaimRewardsArgs(TypedDict):
+    assets: list[ChecksumAddress]
+    amount: int
+    reward_token: ChecksumAddress
 
 
 def claim_rewards_encode(
@@ -644,7 +703,7 @@ async def sweep(*args) -> TxParams:
         comptroller_proxy: ChecksumAddress
         external_position_manager: ChecksumAddress
         external_position_proxy: ChecksumAddress
-        action_args: dict[str, list[ChecksumAddress]]
+        call_args: dict[str, list[ChecksumAddress]]
             {
                 "assets": list[ChecksumAddress],
             }
@@ -659,6 +718,10 @@ SWEEP_ENCODING = [
         "name": "assets",
     },
 ]
+
+
+class SweepArgs(TypedDict):
+    assets: list[ChecksumAddress]
 
 
 def sweep_encode(assets: list[ChecksumAddress]) -> HexStr:

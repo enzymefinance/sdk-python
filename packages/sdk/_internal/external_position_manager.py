@@ -1,4 +1,4 @@
-from typing import Callable, Any
+from typing import Callable, Any, TypedDict
 from web3.types import ChecksumAddress, HexStr, TxParams
 from web3.constants import ADDRESS_ZERO
 from eth_abi import encode, decode
@@ -6,6 +6,13 @@ from web3 import Web3
 from ..utils.clients import WalletClient
 from ..utils.encoding import encoding_to_types
 from .extensions import call_extension
+
+
+class Action(TypedDict):
+    create_external_position: int
+    call_on_external_position: int
+    remove_external_position: int
+    reactivate_external_position: int
 
 
 ACTION = {
@@ -16,13 +23,21 @@ ACTION = {
 }
 
 
+class UseParams(TypedDict):
+    client: WalletClient
+    comptroller_proxy: ChecksumAddress
+    external_position_manager: ChecksumAddress
+    external_position_proxy: ChecksumAddress
+    call_args: dict[str, Any]
+
+
 def make_use(action: int, encoder: Callable | None = None) -> Callable:
     async def use_external_position(
         client: WalletClient,
         comptroller_proxy: ChecksumAddress,
         external_position_manager: ChecksumAddress,
         external_position_proxy: ChecksumAddress,
-        action_args: dict[str, Any],
+        call_args: dict[str, Any],
     ) -> TxParams:
         return await call(
             client,
@@ -30,10 +45,19 @@ def make_use(action: int, encoder: Callable | None = None) -> Callable:
             external_position_manager,
             external_position_proxy,
             action,
-            "0x" if encoder is None else encoder(**action_args),
+            "0x" if encoder is None else encoder(**call_args),
         )
 
     return use_external_position
+
+
+class CreateAndUseParams(TypedDict):
+    client: WalletClient
+    type_id: int
+    comptroller_proxy: ChecksumAddress
+    external_position_manager: ChecksumAddress
+    initialization_data: HexStr
+    call_args: dict[str, Any]
 
 
 def make_create_and_use(action: int, encoder: Callable | None = None) -> Callable:
@@ -43,7 +67,7 @@ def make_create_and_use(action: int, encoder: Callable | None = None) -> Callabl
         comptroller_proxy: ChecksumAddress,
         external_position_manager: ChecksumAddress,
         initialization_data: HexStr,
-        action_args: dict[str, Any],
+        call_args: dict[str, Any],
     ) -> TxParams:
         return await create(
             client,
@@ -54,7 +78,7 @@ def make_create_and_use(action: int, encoder: Callable | None = None) -> Callabl
             call_encode(
                 ADDRESS_ZERO,
                 action,
-                "0x" if encoder is None else encoder(**action_args),
+                "0x" if encoder is None else encoder(**call_args),
             ),
         )
 
@@ -81,16 +105,22 @@ CALL_ENCODING = [
 ]
 
 
+class CallArgs(TypedDict):
+    external_position_proxy: ChecksumAddress
+    action_id: int
+    action_args: HexStr | None
+
+
 def call_encode(
     external_position_proxy: ChecksumAddress,
     action_id: int,
-    action_args: HexStr = "0x",
+    action_args: HexStr | None = None,
 ) -> HexStr:
     types = encoding_to_types(CALL_ENCODING)
     values = [
         external_position_proxy,
         action_id,
-        Web3.to_bytes(hexstr=action_args),
+        Web3.to_bytes(hexstr=action_args or "0x"),
     ]
     return Web3.to_hex(encode(types, values))
 
@@ -113,13 +143,22 @@ def call_decode(encoded: HexStr) -> dict[str, ChecksumAddress | int | HexStr]:
     }
 
 
+class CallParams(TypedDict):
+    client: WalletClient
+    comptroller_proxy: ChecksumAddress
+    external_position_manager: ChecksumAddress
+    external_position_proxy: ChecksumAddress
+    action_id: int
+    action_args: HexStr
+
+
 async def call(
     client: WalletClient,
     comptroller_proxy: ChecksumAddress,
     external_position_manager: ChecksumAddress,
     external_position_proxy: ChecksumAddress,
     action_id: int,
-    action_args: HexStr = "0x",
+    action_args: HexStr,
 ) -> TxParams:
     return await call_extension(
         client,
@@ -150,16 +189,22 @@ CREATE_ENCODING = [
 ]
 
 
+class CreateArgs(TypedDict):
+    type_id: int
+    initialization_data: HexStr | None
+    call_on_external_position_call_args: HexStr | None
+
+
 def create_encode(
     type_id: int,
-    initialization_data: HexStr = "0x",
-    call_on_external_position_call_args: HexStr = "0x",
+    initialization_data: HexStr | None,
+    call_on_external_position_call_args: HexStr | None,
 ) -> HexStr:
     types = encoding_to_types(CREATE_ENCODING)
     values = [
         type_id,
-        Web3.to_bytes(hexstr=initialization_data),
-        Web3.to_bytes(hexstr=call_on_external_position_call_args),
+        Web3.to_bytes(hexstr=initialization_data or "0x"),
+        Web3.to_bytes(hexstr=call_on_external_position_call_args or "0x"),
     ]
     return Web3.to_hex(encode(types, values))
 
@@ -182,20 +227,29 @@ def create_decode(encoded: HexStr) -> dict[str, int | HexStr | HexStr]:
     }
 
 
+class CreateParams(TypedDict):
+    client: WalletClient
+    type_id: int
+    comptroller_proxy: ChecksumAddress
+    external_position_manager: ChecksumAddress
+    initialization_data: HexStr | None
+    call_args: HexStr | None
+
+
 async def create(
     client: WalletClient,
     type_id: int,
     comptroller_proxy: ChecksumAddress,
     external_position_manager: ChecksumAddress,
-    initialization_data: HexStr = "0x",
-    call_args: HexStr = "0x",
+    initialization_data: HexStr | None,
+    call_args: HexStr | None,
 ) -> TxParams:
     return await call_extension(
         client,
         comptroller_proxy,
         external_position_manager,
         ACTION["create_external_position"],
-        create_encode(type_id, initialization_data, call_args),
+        create_encode(type_id, initialization_data or "0x", call_args or "0x"),
     )
 
 
@@ -204,16 +258,9 @@ async def create_only(
     type_id: int,
     comptroller_proxy: ChecksumAddress,
     external_position_manager: ChecksumAddress,
-    initialization_data: HexStr = "0x",
+    initialization_data: HexStr | None,
 ) -> TxParams:
-    return await create(
-        client,
-        type_id,
-        comptroller_proxy,
-        external_position_manager,
-        initialization_data,
-        "0x",
-    )
+    return await create(*locals().values(), None)
 
 
 # --------------------------------------------------------------------------------------------
@@ -226,6 +273,10 @@ REACTIVATE_ENCODING = [
         "type": "address",
     },
 ]
+
+
+class ReactivateArgs(TypedDict):
+    external_position: ChecksumAddress
 
 
 def reactivate_encode(external_position: ChecksumAddress) -> HexStr:
@@ -246,6 +297,13 @@ def reactivate_decode(encoded: HexStr) -> dict[str, ChecksumAddress]:
     return {
         "external_position": Web3.to_checksum_address(decoded[0]),
     }
+
+
+class ReactivateParams(TypedDict):
+    client: WalletClient
+    comptroller_proxy: ChecksumAddress
+    external_position_manager: ChecksumAddress
+    external_position_proxy: ChecksumAddress
 
 
 async def reactivate(
@@ -275,6 +333,10 @@ REMOVE_ENCODING = [
 ]
 
 
+class RemoveArgs(TypedDict):
+    external_position_proxy: ChecksumAddress
+
+
 def remove_encode(external_position_proxy: ChecksumAddress) -> HexStr:
     types = encoding_to_types(REMOVE_ENCODING)
     values = [external_position_proxy]
@@ -293,6 +355,13 @@ def remove_decode(encoded: HexStr) -> dict[str, ChecksumAddress]:
     return {
         "external_position_proxy": Web3.to_checksum_address(decoded[0]),
     }
+
+
+class RemoveParams(TypedDict):
+    client: WalletClient
+    comptroller_proxy: ChecksumAddress
+    external_position_manager: ChecksumAddress
+    external_position_proxy: ChecksumAddress
 
 
 async def remove(

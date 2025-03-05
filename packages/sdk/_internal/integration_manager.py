@@ -1,10 +1,16 @@
 from web3 import Web3
 from web3.types import ChecksumAddress, HexStr, TxParams
 from eth_abi import encode, decode
-from typing import Callable, Any
+from typing import Callable, Any, TypedDict
 from .extensions import call_extension
 from ..utils.clients import WalletClient
 from ..utils.encoding import encoding_to_types
+
+
+class Action(TypedDict):
+    call_on_integration: int
+    add_tracked_assets: int
+    remove_tracked_assets: int
 
 
 ACTION = {
@@ -12,6 +18,22 @@ ACTION = {
     "add_tracked_assets": 1,
     "remove_tracked_assets": 2,
 }
+
+
+class Selector(TypedDict):
+    action: HexStr
+    claim_rewards: HexStr
+    lend: HexStr
+    lend_and_stake: HexStr
+    redeem: HexStr
+    stake: HexStr
+    take_multiple_orders: HexStr
+    take_order: HexStr
+    transfer: HexStr
+    unstake: HexStr
+    unstake_and_redeem: HexStr
+    wrap: HexStr
+
 
 SELECTOR = {
     "action": "0xa7a19e00",  # action(address,bytes,bytes)
@@ -27,6 +49,14 @@ SELECTOR = {
     "unstake_and_redeem": "0x8334eb99",  # unstakeAndRedeem(address,bytes,bytes)
     "wrap": "0xa5ca2d71",  # wrap(address,bytes,bytes)
 }
+
+
+class UseParams(TypedDict):
+    client: WalletClient
+    comptroller_proxy: ChecksumAddress
+    integration_manager: ChecksumAddress
+    integration_adapter: ChecksumAddress
+    call_args: dict[str, Any]
 
 
 def make_use(selector: HexStr, encoder: Callable) -> Callable:
@@ -69,16 +99,22 @@ CALL_ENCODING = [
 ]
 
 
+class CallArgs(TypedDict):
+    function_selector: HexStr
+    integration_adapter: ChecksumAddress
+    call_args: HexStr | None
+
+
 def call_encode(
     function_selector: HexStr,
     integration_adapter: ChecksumAddress,
-    call_args: HexStr = "0x",
+    call_args: HexStr | None,
 ) -> HexStr:
     types = encoding_to_types(CALL_ENCODING)
     values = [
         integration_adapter,
         Web3.to_bytes(hexstr=function_selector),
-        Web3.to_bytes(hexstr=call_args),
+        Web3.to_bytes(hexstr=call_args or "0x"),
     ]
     return Web3.to_hex(encode(types, values))
 
@@ -101,20 +137,29 @@ def call_decode(encoded: HexStr) -> dict[str, HexStr | ChecksumAddress | HexStr]
     }
 
 
+class CallParams(TypedDict):
+    client: WalletClient
+    comptroller_proxy: ChecksumAddress
+    integration_manager: ChecksumAddress
+    integration_adapter: ChecksumAddress
+    function_selector: HexStr
+    call_args: HexStr | None
+
+
 async def call(
     client: WalletClient,
     comptroller_proxy: ChecksumAddress,
     integration_manager: ChecksumAddress,
     integration_adapter: ChecksumAddress,
     function_selector: HexStr,
-    call_args: HexStr = "0x",
+    call_args: HexStr | None,
 ) -> TxParams:
     return await call_extension(
         client,
         comptroller_proxy,
         integration_manager,
         ACTION["call_on_integration"],
-        call_encode(function_selector, integration_adapter, call_args),
+        call_encode(function_selector, integration_adapter, call_args or "0x"),
     )
 
 
@@ -128,6 +173,10 @@ ADD_TRACKED_ASSETS_ENCODING = [
         "name": "assets",
     },
 ]
+
+
+class AddTrackedAssetsArgs(TypedDict):
+    add_assets: list[ChecksumAddress]
 
 
 def add_tracked_assets_encode(add_assets: list[ChecksumAddress]) -> HexStr:
@@ -148,6 +197,13 @@ def add_tracked_assets_decode(encoded: HexStr) -> dict[str, list[ChecksumAddress
     return {
         "assets": decoded[0],
     }
+
+
+class AddTrackedAssetsParams(TypedDict):
+    client: WalletClient
+    comptroller_proxy: ChecksumAddress
+    integration_manager: ChecksumAddress
+    add_assets: list[ChecksumAddress]
 
 
 async def add_tracked_assets(
@@ -177,6 +233,10 @@ REMOVE_TRACKED_ASSETS_ENCODING = [
 ]
 
 
+class RemoveTrackedAssetsArgs(TypedDict):
+    remove_assets: list[ChecksumAddress]
+
+
 def remove_tracked_assets_encode(remove_assets: list[ChecksumAddress]) -> HexStr:
     types = encoding_to_types(REMOVE_TRACKED_ASSETS_ENCODING)
     values = [remove_assets]
@@ -195,6 +255,13 @@ def remove_tracked_assets_decode(encoded: HexStr) -> dict[str, list[ChecksumAddr
     return {
         "assets": decoded[0],
     }
+
+
+class RemoveTrackedAssetsParams(TypedDict):
+    client: WalletClient
+    comptroller_proxy: ChecksumAddress
+    integration_manager: ChecksumAddress
+    remove_assets: list[ChecksumAddress]
 
 
 async def remove_tracked_assets(

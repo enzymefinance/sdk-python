@@ -1,9 +1,9 @@
+from typing import TypedDict
 from web3 import Web3
 from web3.types import ChecksumAddress, HexStr, TxParams
 from eth_abi import encode, decode
 from ..._internal import integration_manager as integration_manager_lib
 from ...utils.encoding import encoding_to_types
-
 
 # --------------------------------------------------------------------------------------------
 # TAKE ORDER
@@ -83,21 +83,37 @@ TAKE_ORDER_ENCODING = [
 ]
 
 
+class OrderDescription(TypedDict):
+    srcToken: ChecksumAddress
+    dstToken: ChecksumAddress
+    srcReceiver: ChecksumAddress
+    dstReceiver: ChecksumAddress
+    amount: int
+    minReturnAmount: int
+    flags: int
+
+
+class TakeOrderArgs(TypedDict):
+    executor: ChecksumAddress
+    order_description: OrderDescription
+    data: HexStr
+
+
 def take_order_encode(
     executor: ChecksumAddress,
-    order_description: dict[str, ChecksumAddress | int],
+    order_description: OrderDescription,
     data: HexStr,
 ) -> HexStr:
     """
     Args:
         order_description:
             {
-                "src_token": ChecksumAddress,
-                "dst_token": ChecksumAddress,
-                "src_receiver": ChecksumAddress,
-                "dst_receiver": ChecksumAddress,
+                "srcToken": ChecksumAddress,
+                "dstToken": ChecksumAddress,
+                "srcReceiver": ChecksumAddress,
+                "dstReceiver": ChecksumAddress,
                 "amount": int,
-                "min_return_amount": int,
+                "minReturnAmount": int,
                 "flags": int,
             }
     """
@@ -105,12 +121,12 @@ def take_order_encode(
     values = [
         executor,
         (
-            order_description["src_token"],
-            order_description["dst_token"],
-            order_description["src_receiver"],
-            order_description["dst_receiver"],
+            order_description["srcToken"],
+            order_description["dstToken"],
+            order_description["srcReceiver"],
+            order_description["dstReceiver"],
             order_description["amount"],
-            order_description["min_return_amount"],
+            order_description["minReturnAmount"],
             order_description["flags"],
         ),
         Web3.to_bytes(hexstr=data),

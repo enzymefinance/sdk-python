@@ -3,7 +3,7 @@ from web3.types import ChecksumAddress, HexStr, TxParams
 from eth_abi import encode, decode
 from ..._internal import integration_manager as integration_manager_lib
 from ...utils.encoding import encoding_to_types
-from typing import Any
+from typing import Any, TypedDict
 
 # --------------------------------------------------------------------------------------------
 # TAKE ORDER
@@ -185,11 +185,66 @@ SIMPLE_SWAP_DATA_ENCODING = [
     }
 ]
 
+
+class Route(TypedDict):
+    index: int
+    targetExchange: ChecksumAddress
+    percent: int
+    payload: HexStr
+    networkFee: int
+
+
+class Adapter(TypedDict):
+    adapter: ChecksumAddress
+    percent: int
+    networkFee: int
+    route: list[Route]
+
+
+class Path(TypedDict):
+    to: ChecksumAddress
+    totalNetworkFee: int
+    adapters: list[Adapter]
+
+
+class MegaSwapPathData(TypedDict):
+    fromAmountPercent: int
+    path: list[Path]
+
+
+MegaSwapData = list[MegaSwapPathData]
+MultiSwapData = list[Path]
+
+
+class SimpleSwapData(TypedDict):
+    incomingAsset: ChecksumAddress
+    callees: list[ChecksumAddress]
+    exchangeData: HexStr
+    startIndexes: list[int]
+    values: list[int]
+
+
+class SwapType(TypedDict):
+    simple: int
+    multi: int
+    mega: int
+
+
 SWAP_TYPE = {
     "simple": 0,
     "multi": 1,
     "mega": 2,
 }
+
+
+class TakeOrderArgs(TypedDict):
+    expected_incoming_asset_amount: int
+    min_incoming_asset_amount: int
+    outgoing_asset: ChecksumAddress
+    outgoing_asset_amount: int
+    uuid: HexStr
+    swap_type: int
+    swap_data: MegaSwapData | MultiSwapData | SimpleSwapData
 
 
 def take_order_encode(
@@ -206,10 +261,10 @@ def take_order_encode(
         if swap_type == 0 (simple):
             swap_data:
                 {
-                    "incoming_asset": ChecksumAddress,
+                    "incomingAsset": ChecksumAddress,
                     "callees": list[ChecksumAddress],
-                    "exchange_data": HexStr,
-                    "start_indexes": list[int],
+                    "exchangeData": HexStr,
+                    "startIndexes": list[int],
                     "values": list[int],
                 }
         elif swap_type == 1 (multi):
@@ -473,9 +528,14 @@ TAKE_MULTIPLE_ORDERS_ENCODING = [
 ]
 
 
+class TakeMultipleOrdersArgs(TypedDict):
+    allow_orders_to_fail: bool
+    orders: list[TakeOrderArgs]
+
+
 def take_multiple_orders_encode(
-    orders: list[dict[str, Any]],
     allow_orders_to_fail: bool,
+    orders: list[TakeOrderArgs],
 ) -> HexStr:
     """
     Args:

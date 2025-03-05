@@ -1,3 +1,4 @@
+from typing import TypedDict
 from web3.types import ChecksumAddress, TxParams
 from .utils.clients import PublicClient, WalletClient
 
@@ -7,6 +8,11 @@ from .utils.clients import PublicClient, WalletClient
 # --------------------------------------------------------------------------------------------
 
 
+class SetFreelyTransferableSharesParams(TypedDict):
+    client: WalletClient
+    vault_proxy: ChecksumAddress
+
+
 async def set_freely_transferable_shares(
     client: WalletClient,
     vault_proxy: ChecksumAddress,
@@ -14,6 +20,12 @@ async def set_freely_transferable_shares(
     contract = client.contract(vault_proxy, "IVaultLib")
     function = contract.functions.setFreelyTransferableShares()
     return await client.populated_transaction(function)
+
+
+class SetNominatedOwnerParams(TypedDict):
+    client: WalletClient
+    vault_proxy: ChecksumAddress
+    next_nominated_owner: ChecksumAddress
 
 
 async def set_nominated_owner(
@@ -26,6 +38,11 @@ async def set_nominated_owner(
     return await client.populated_transaction(function)
 
 
+class RemoveNominatedOwnerParams(TypedDict):
+    client: WalletClient
+    vault_proxy: ChecksumAddress
+
+
 async def remove_nominated_owner(
     client: WalletClient,
     vault_proxy: ChecksumAddress,
@@ -33,6 +50,11 @@ async def remove_nominated_owner(
     contract = client.contract(vault_proxy, "IVaultLib")
     function = contract.functions.removeNominatedOwner()
     return await client.populated_transaction(function)
+
+
+class ClaimOwnershipParams(TypedDict):
+    client: WalletClient
+    vault_proxy: ChecksumAddress
 
 
 async def claim_ownership(
@@ -44,6 +66,12 @@ async def claim_ownership(
     return await client.populated_transaction(function)
 
 
+class SetNameParams(TypedDict):
+    client: WalletClient
+    vault_proxy: ChecksumAddress
+    name: str
+
+
 async def set_name(
     client: WalletClient,
     vault_proxy: ChecksumAddress,
@@ -52,6 +80,12 @@ async def set_name(
     contract = client.contract(vault_proxy, "IVaultLib")
     function = contract.functions.setName(name)
     return await client.populated_transaction(function)
+
+
+class SetSymbolParams(TypedDict):
+    client: WalletClient
+    vault_proxy: ChecksumAddress
+    symbol: str
 
 
 async def set_symbol(

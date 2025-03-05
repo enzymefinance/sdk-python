@@ -1,8 +1,8 @@
+from typing import TypedDict
 from web3 import Web3
 from web3.types import ChecksumAddress, TxParams, HexStr
 from web3.constants import ADDRESS_ZERO
 from .utils.clients import PublicClient, WalletClient
-
 
 RELAY_HUB_ABI = [
     {
@@ -226,9 +226,35 @@ async def get_nonce(
     return await function.call()
 
 
+class Request(TypedDict):
+    from_: ChecksumAddress
+    to: ChecksumAddress
+    value: int
+    gas: int
+    nonce: int
+    data: HexStr
+    validUntil: int
+
+
+class RelayData(TypedDict):
+    gasPrice: int
+    pctRelayFee: int
+    baseRelayFee: int
+    relayWorker: ChecksumAddress
+    paymaster: ChecksumAddress
+    forwarder: ChecksumAddress
+    paymasterData: HexStr
+    clientId: int
+
+
+class RelayRequest(TypedDict):
+    request: Request
+    relayData: RelayData
+
+
 def encode_relay_call_data(
     max_acceptance_budget: int,
-    relay_request: dict,
+    relay_request: RelayRequest,
     signature: HexStr,
     approval_data: HexStr,
     gas_limit: int,
