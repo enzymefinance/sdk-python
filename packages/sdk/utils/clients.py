@@ -13,10 +13,11 @@ class PublicClient:
         self._contracts = {}
 
     def contract(self, address: str, abi_name: str) -> AsyncContract:
-        if address not in self._contracts:
+        key = f"{address}_{abi_name}"
+        if key not in self._contracts:
             abi = abis.get(abi_name)
-            self._contracts[address] = self.w3.eth.contract(address=address, abi=abi)
-        return self._contracts[address]
+            self._contracts[key] = self.w3.eth.contract(address=address, abi=abi)
+        return self._contracts[key]
 
 
 class WalletClient(PublicClient):

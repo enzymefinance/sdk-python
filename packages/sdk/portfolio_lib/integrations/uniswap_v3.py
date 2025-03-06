@@ -3,7 +3,7 @@ from web3.types import ChecksumAddress, HexStr, TxParams
 from eth_abi import encode, decode
 from ..._internal import integration_manager as integration_manager_lib
 from ...utils.encoding import encoding_to_types
-from typing import Any
+from typing import Any, TypedDict
 
 # --------------------------------------------------------------------------------------------
 # TAKE ORDER
