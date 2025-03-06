@@ -1,7 +1,8 @@
 import asyncio
-from typing import List, TypedDict
+from typing import TypedDict
 from web3.types import ChecksumAddress, TxParams
 from .utils.clients import WalletClient, PublicClient
+from ..abis import abis
 
 
 # --------------------------------------------------------------------------------------------
@@ -22,7 +23,7 @@ async def approve(
     spender: ChecksumAddress,
     amount: int,
 ) -> TxParams:
-    contract = client.contract(asset, "IERC20")
+    contract = client.contract(asset, abis.IERC20)
     function = contract.functions.approve(spender, amount)
     return await function.call()
 
@@ -61,7 +62,7 @@ async def get_name(
     asset: ChecksumAddress,
 ) -> str:
     # TODO: Handle case where name is a bytes32
-    contract = client.contract(asset, "IERC20")
+    contract = client.contract(asset, abis.IERC20)
     function = contract.functions.name()
     return await function.call()
 
@@ -71,7 +72,7 @@ async def get_symbol(
     asset: ChecksumAddress,
 ) -> str:
     # TODO: Handle case where symbol is a bytes32
-    contract = client.contract(asset, "IERC20")
+    contract = client.contract(asset, abis.IERC20)
     function = contract.functions.symbol()
     return await function.call()
 
@@ -81,7 +82,7 @@ async def get_balance_of(
     owner: ChecksumAddress,
     asset: ChecksumAddress,
 ) -> int:
-    contract = client.contract(asset, "IERC20")
+    contract = client.contract(asset, abis.IERC20)
     function = contract.functions.balanceOf(owner)
     return await function.call()
 
@@ -89,8 +90,8 @@ async def get_balance_of(
 async def get_balances_of(
     client: PublicClient,
     owner: ChecksumAddress,
-    assets: List[ChecksumAddress],
-) -> List[dict[ChecksumAddress, int]]:
+    assets: list[ChecksumAddress],
+) -> list[dict[ChecksumAddress, int]]:
     """
     Returns:
         [
@@ -119,7 +120,7 @@ async def get_allowance(
     owner: ChecksumAddress,
     spender: ChecksumAddress,
 ) -> int:
-    contract = client.contract(asset, "IERC20")
+    contract = client.contract(asset, abis.IERC20)
     function = contract.functions.allowance(owner, spender)
     return await function.call()
 
@@ -128,7 +129,7 @@ async def get_decimals(
     client: PublicClient,
     asset: ChecksumAddress,
 ) -> int:
-    contract = client.contract(asset, "IERC20")
+    contract = client.contract(asset, abis.IERC20)
     function = contract.functions.decimals()
     return await function.call()
 
@@ -137,7 +138,7 @@ async def get_total_supply(
     client: PublicClient,
     asset: ChecksumAddress,
 ) -> int:
-    contract = client.contract(asset, "IERC20")
+    contract = client.contract(asset, abis.IERC20)
     function = contract.functions.totalSupply()
     return await function.call()
 
@@ -149,7 +150,7 @@ async def get_canonical_value(
     quote_asset: ChecksumAddress,
     amount: int,
 ) -> int:
-    contract = client.contract(value_interpreter, "IValueInterpreter")
+    contract = client.contract(value_interpreter, abis.IValueInterpreter)
     function = contract.functions.calcCanonicalAssetValue(
         base_asset, amount, quote_asset
     )

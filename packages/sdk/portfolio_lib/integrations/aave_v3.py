@@ -11,6 +11,7 @@ from ...utils.conversion import from_wei
 from ...utils.encoding import encoding_to_types
 from ... import asset as asset_lib
 
+
 # --------------------------------------------------------------------------------------------
 # LEND
 # --------------------------------------------------------------------------------------------

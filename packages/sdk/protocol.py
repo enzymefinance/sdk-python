@@ -1,7 +1,6 @@
 from web3.types import ChecksumAddress
-from eth_abi import encode
 from .utils.clients import PublicClient
-from .utils.encoding import encoding_to_types
+from ..abis import abis
 
 
 async def is_supported_asset(
@@ -9,10 +8,7 @@ async def is_supported_asset(
     value_interpreter: ChecksumAddress,
     asset: ChecksumAddress,
 ) -> bool:
-    contract = client.contract(
-        value_interpreter,
-        "IValueInterpreter",
-    )
+    contract = client.contract(value_interpreter, abis.IValueInterpreter)
     function = contract.functions.isSupportedAsset(asset)
     return await function.call()
 
@@ -22,10 +18,7 @@ async def is_supported_asset_for_derivative_price_feed(
     derivative_price_feed: ChecksumAddress,
     asset: ChecksumAddress,
 ) -> bool:
-    contract = client.contract(
-        derivative_price_feed,
-        "IDerivativePriceFeed",
-    )
+    contract = client.contract(derivative_price_feed, abis.IDerivativePriceFeed)
     function = contract.functions.isSupportedAsset(asset)
     return await function.call()
 
@@ -35,7 +28,7 @@ async def is_supported_primitive_asset(
     value_interpreter: ChecksumAddress,
     asset: ChecksumAddress,
 ) -> bool:
-    contract = client.contract(value_interpreter, "IValueInterpreter")
+    contract = client.contract(value_interpreter, abis.IValueInterpreter)
     function = contract.functions.isSupportedPrimitiveAsset(asset)
     return await function.call()
 
@@ -45,7 +38,7 @@ async def is_supported_derivative_asset(
     value_interpreter: ChecksumAddress,
     asset: ChecksumAddress,
 ) -> bool:
-    contract = client.contract(value_interpreter, "IValueInterpreter")
+    contract = client.contract(value_interpreter, abis.IValueInterpreter)
     function = contract.functions.isSupportedDerivativeAsset(asset)
     return await function.call()
 
@@ -55,7 +48,7 @@ async def get_aggregator_for_primitive(
     value_interpreter: ChecksumAddress,
     asset: ChecksumAddress,
 ) -> ChecksumAddress:
-    contract = client.contract(value_interpreter, "IValueInterpreter")
+    contract = client.contract(value_interpreter, abis.IValueInterpreter)
     function = contract.functions.getAggregatorForPrimitive(asset)
     return await function.call()
 
@@ -65,7 +58,7 @@ async def get_rate_asset_for_primitive(
     value_interpreter: ChecksumAddress,
     asset: ChecksumAddress,
 ) -> ChecksumAddress:
-    contract = client.contract(value_interpreter, "IValueInterpreter")
+    contract = client.contract(value_interpreter, abis.IValueInterpreter)
     function = contract.functions.getRateAssetForPrimitive(asset)
     return await function.call()
 
@@ -75,6 +68,6 @@ async def get_price_feed_for_derivative(
     value_interpreter: ChecksumAddress,
     asset: ChecksumAddress,
 ) -> ChecksumAddress:
-    contract = client.contract(value_interpreter, "IValueInterpreter")
+    contract = client.contract(value_interpreter, abis.IValueInterpreter)
     function = contract.functions.getPriceFeedForDerivative(asset)
     return await function.call()

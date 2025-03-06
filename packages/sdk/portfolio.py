@@ -5,6 +5,7 @@ from .utils.clients import PublicClient, WalletClient
 from . import asset as assets
 from .portfolio_lib import asset_managers
 from .portfolio_lib import integrations
+from ..abis import abis
 
 from ._internal.external_position_manager import (
     ACTION as EXTERNAL_POSITION_ACTION,
@@ -60,7 +61,7 @@ async def vault_call_on_contract(
     selector: HexStr,
     encoded_args: HexStr,
 ) -> TxParams:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.vaultCallOnContract(contract, selector, encoded_args)
     return await client.populated_transaction(function)
 
@@ -129,7 +130,7 @@ async def get_tracked_assets(
     client: PublicClient,
     vault_proxy: ChecksumAddress,
 ) -> list[ChecksumAddress]:
-    contract = client.contract(vault_proxy, "IVaultLib")
+    contract = client.contract(vault_proxy, abis.IVaultLib)
     function = contract.functions.getTrackedAssets()
     return await function.call()
 
@@ -144,7 +145,7 @@ async def is_active_external_position(
     vault_proxy: ChecksumAddress,
     external_position: ChecksumAddress,
 ) -> bool:
-    contract = client.contract(vault_proxy, "IVaultLib")
+    contract = client.contract(vault_proxy, abis.IVaultLib)
     function = contract.functions.isActiveExternalPosition(external_position)
     return await function.call()
 
@@ -177,7 +178,7 @@ async def get_active_external_positions(
     client: PublicClient,
     vault_proxy: ChecksumAddress,
 ) -> list[ChecksumAddress]:
-    contract = client.contract(vault_proxy, "IVaultLib")
+    contract = client.contract(vault_proxy, abis.IVaultLib)
     function = contract.functions.getActiveExternalPositions()
     return await function.call()
 
@@ -186,7 +187,7 @@ async def get_external_position_managed_assets(
     client: PublicClient,
     external_position: ChecksumAddress,
 ) -> list[dict[ChecksumAddress, int]]:
-    contract = client.contract(external_position, "IExternalPosition")
+    contract = client.contract(external_position, abis.IExternalPosition)
     function = contract.functions.getManagedAssets()
     assets, amounts = await function.call()
     assert all(amount is not None for amount in amounts), "Missing managed asset amount"
@@ -203,7 +204,7 @@ async def get_external_position_debt_assets(
     client: PublicClient,
     external_position: ChecksumAddress,
 ) -> list[dict[ChecksumAddress, int]]:
-    contract = client.contract(external_position, "IExternalPosition")
+    contract = client.contract(external_position, abis.IExternalPosition)
     function = contract.functions.getDebtAssets()
     assets, amounts = await function.call()
     assert all(amount is not None for amount in amounts), "Missing debt asset amount"
@@ -234,7 +235,7 @@ async def get_external_position_type(
     client: PublicClient,
     external_position: ChecksumAddress,
 ) -> int:
-    contract = client.contract(external_position, "IExternalPositionProxy")
+    contract = client.contract(external_position, abis.IExternalPositionProxy)
     function = contract.functions.getExternalPositionType()
     return await function.call()
 
@@ -244,6 +245,6 @@ async def get_type_label(
     external_position_factory: ChecksumAddress,
     type_id: int,
 ) -> str:
-    contract = client.contract(external_position_factory, "IExternalPositionFactory")
+    contract = client.contract(external_position_factory, abis.IExternalPositionFactory)
     function = contract.functions.getTypeLabel(type_id)
     return await function.call()

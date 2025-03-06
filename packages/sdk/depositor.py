@@ -2,6 +2,7 @@ from typing import TypedDict
 from web3.types import ChecksumAddress, HexStr, TxParams
 from .utils.clients import PublicClient, WalletClient
 from .configuration_lib.policy import is_enabled
+from ..abis import abis
 
 
 # --------------------------------------------------------------------------------------------
@@ -13,7 +14,7 @@ async def get_shares_action_timelock(
     client: PublicClient,
     comptroller_proxy: ChecksumAddress,
 ) -> int:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.getSharesActionTimelock()
     return await function.call()
 
@@ -23,7 +24,7 @@ async def get_last_shares_bought_timestamp(
     depositor: ChecksumAddress,
     comptroller_proxy: ChecksumAddress,
 ) -> int:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.getLastSharesBoughtTimestampForAccount(depositor)
     return await function.call()
 
@@ -34,7 +35,7 @@ async def get_expected_shares_for_deposit(
     amount: int,
     depositor: ChecksumAddress,
 ) -> int:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.buyShares(amount, 1)
     return await function.call({"from": depositor})
 
@@ -46,7 +47,7 @@ async def deposit(
     depositor: ChecksumAddress,
     min_shares_quantity: int,
 ) -> TxParams:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.buyShares(amount, min_shares_quantity)
     return await client.populated_transaction(function, account=depositor)
 
@@ -73,7 +74,7 @@ async def get_specific_assets_redemption_expected_amounts(
     payout_assets: list[ChecksumAddress],
     payout_percentages: list[int],
 ) -> dict[ChecksumAddress, int]:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.redeemSharesForSpecificAssets(
         recipient, shares_quantity, payout_assets, payout_percentages
     )
@@ -90,7 +91,7 @@ async def redeem_shares_for_specific_assets(
     payout_assets: list[ChecksumAddress],
     payout_percentages: list[int],
 ) -> TxParams:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.redeemSharesForSpecificAssets(
         recipient, shares_quantity, payout_assets, payout_percentages
     )
@@ -105,7 +106,7 @@ async def redeem_shares_in_kind(
     additional_assets: list[ChecksumAddress],
     assets_to_skip: list[ChecksumAddress],
 ) -> TxParams:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.redeemSharesInKind(
         recipient, shares_quantity, additional_assets, assets_to_skip
     )
@@ -139,7 +140,7 @@ async def get_expected_shares_for_native_token_deposit(
     amount: int,
     depositor: ChecksumAddress,
 ) -> int:
-    contract = client.contract(deposit_wrapper, "IDepositWrapper")
+    contract = client.contract(deposit_wrapper, abis.IDepositWrapper)
     function = contract.functions.exchangeEthAndBuyShares(
         comptroller_proxy,
         1,
@@ -162,7 +163,7 @@ async def deposit_native_token(
     amount: int,
     min_shares_quantity: int,
 ) -> TxParams:
-    contract = client.contract(deposit_wrapper, "IDepositWrapper")
+    contract = client.contract(deposit_wrapper, abis.IDepositWrapper)
     function = contract.functions.exchangeEthAndBuyShares(
         comptroller_proxy,
         min_shares_quantity,
@@ -198,7 +199,7 @@ async def get_expected_shares_for_erc20_deposit(
     exchange_min_received: int,
     depositor: ChecksumAddress,
 ) -> int:
-    contract = client.contract(deposit_wrapper, "IDepositWrapper")
+    contract = client.contract(deposit_wrapper, abis.IDepositWrapper)
     function = contract.functions.exchangeErc20AndBuyShares(
         comptroller_proxy,
         1,
@@ -224,7 +225,7 @@ async def deposit_erc20(
     exchange_min_received: int,
     min_shares_quantity: int,
 ) -> TxParams:
-    contract = client.contract(deposit_wrapper, "IDepositWrapper")
+    contract = client.contract(deposit_wrapper, abis.IDepositWrapper)
     function = contract.functions.exchangeErc20AndBuyShares(
         comptroller_proxy,
         min_shares_quantity,
@@ -257,7 +258,7 @@ async def get_expected_shares_for_shares_wrapper_deposit(
     deposit_amount: int,
     depositor: ChecksumAddress,
 ) -> int:
-    contract = client.contract(shares_wrapper, "IGatedRedemptionQueueSharesWrapperLib")
+    contract = client.contract(shares_wrapper, abis.IGatedRedemptionQueueSharesWrapperLib)
     function = contract.functions.deposit(deposit_asset, deposit_amount, 1)
     return await function.call({"from": depositor})
 
@@ -269,7 +270,7 @@ async def shares_wrapper_deposit(
     deposit_amount: int,
     min_shares_amount: int,
 ) -> TxParams:
-    contract = client.contract(shares_wrapper, "IGatedRedemptionQueueSharesWrapperLib")
+    contract = client.contract(shares_wrapper, abis.IGatedRedemptionQueueSharesWrapperLib)
     function = contract.functions.deposit(
         deposit_asset, deposit_amount, min_shares_amount
     )
@@ -282,7 +283,7 @@ async def shares_wrapper_request_deposit(
     deposit_asset: ChecksumAddress,
     deposit_amount: int,
 ) -> TxParams:
-    contract = client.contract(shares_wrapper, "IGatedRedemptionQueueSharesWrapperLib")
+    contract = client.contract(shares_wrapper, abis.IGatedRedemptionQueueSharesWrapperLib)
     function = contract.functions.requestDeposit(deposit_asset, deposit_amount)
     return await client.populated_transaction(function)
 
@@ -292,7 +293,7 @@ async def shares_wrapper_cancel_request_deposit(
     shares_wrapper: ChecksumAddress,
     deposit_asset: ChecksumAddress,
 ) -> TxParams:
-    contract = client.contract(shares_wrapper, "IGatedRedemptionQueueSharesWrapperLib")
+    contract = client.contract(shares_wrapper, abis.IGatedRedemptionQueueSharesWrapperLib)
     function = contract.functions.cancelRequestDeposit(deposit_asset)
     return await client.populated_transaction(function)
 
@@ -307,7 +308,7 @@ async def shares_wrapper_request_redeem(
     shares_wrapper: ChecksumAddress,
     amount: int,
 ) -> TxParams:
-    contract = client.contract(shares_wrapper, "IGatedRedemptionQueueSharesWrapperLib")
+    contract = client.contract(shares_wrapper, abis.IGatedRedemptionQueueSharesWrapperLib)
     function = contract.functions.requestRedeem(amount)
     return await client.populated_transaction(function)
 
@@ -316,7 +317,7 @@ async def shares_wrapper_cancel_request_redeem(
     client: WalletClient,
     shares_wrapper: ChecksumAddress,
 ) -> TxParams:
-    contract = client.contract(shares_wrapper, "IGatedRedemptionQueueSharesWrapperLib")
+    contract = client.contract(shares_wrapper, abis.IGatedRedemptionQueueSharesWrapperLib)
     function = contract.functions.cancelRequestRedeem()
     return await client.populated_transaction(function)
 
@@ -331,7 +332,7 @@ async def redemption_queue_request_redeem(
     redemption_queue: ChecksumAddress,
     amount: int,
 ) -> TxParams:
-    contract = client.contract(redemption_queue, "ISingleAssetRedemptionQueueLib")
+    contract = client.contract(redemption_queue, abis.ISingleAssetRedemptionQueueLib)
     function = contract.functions.requestRedeem(amount)
     return await client.populated_transaction(function)
 
@@ -341,7 +342,7 @@ async def redemption_queue_withdraw_request(
     redemption_queue: ChecksumAddress,
     request_id: int,
 ) -> TxParams:
-    contract = client.contract(redemption_queue, "ISingleAssetRedemptionQueueLib")
+    contract = client.contract(redemption_queue, abis.ISingleAssetRedemptionQueueLib)
     function = contract.functions.withdrawRequest(request_id)
     return await client.populated_transaction(function)
 
@@ -366,7 +367,7 @@ async def is_allowed_depositor(
         return True
 
     contract = client.contract(
-        allowed_deposit_recipients_policy, "IAllowedDepositRecipientsPolicy"
+        allowed_deposit_recipients_policy, abis.IAllowedDepositRecipientsPolicy
     )
     function = contract.functions.passesRule(comptroller_proxy, depositor)
     return await function.call()

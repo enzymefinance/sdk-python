@@ -3,7 +3,7 @@ from web3.types import ChecksumAddress, HexStr, TxParams
 from eth_abi import encode
 from ...utils.clients import PublicClient, WalletClient
 from ...utils.encoding import encoding_to_types
-
+from ....abis import abis
 
 # --------------------------------------------------------------------------------------------
 # FACTORY
@@ -21,7 +21,7 @@ async def deploy_proxy(
 ) -> TxParams:
     contract = client.contract(
         share_price_throttled_asset_manager_factory,
-        "ISharePriceThrottledAssetManagerFactory",
+        abis.ISharePriceThrottledAssetManagerFactory,
     )
     function = contract.functions.deployProxy(
         owner,
@@ -76,7 +76,7 @@ async def execute_calls(
     """
     contract = client.contract(
         share_price_throttled_asset_manager,
-        "ISharePriceThrottledAssetManagerLib",
+        abis.ISharePriceThrottledAssetManagerLib,
     )
     types = encoding_to_types(EXECUTE_CALLS_ENCODING)
     args = [[[target, Web3.to_bytes(hexstr=data)] for target, data in calls]]
@@ -91,7 +91,7 @@ async def shutdown(
 ) -> TxParams:
     contract = client.contract(
         share_price_throttled_asset_manager,
-        "ISharePriceThrottledAssetManagerLib",
+        abis.ISharePriceThrottledAssetManagerLib,
     )
     function = contract.functions.shutdown()
     return await client.populated_transaction(function)
@@ -103,7 +103,7 @@ async def get_loss_tolerance(
 ) -> int:
     contract = client.contract(
         share_price_throttled_asset_manager,
-        "ISharePriceThrottledAssetManagerLib",
+        abis.ISharePriceThrottledAssetManagerLib,
     )
     function = contract.functions.getLossTolerance()
     return await function.call()
@@ -115,7 +115,7 @@ async def get_loss_tolerance_period_duration(
 ) -> int:
     contract = client.contract(
         share_price_throttled_asset_manager,
-        "ISharePriceThrottledAssetManagerLib",
+        abis.ISharePriceThrottledAssetManagerLib,
     )
     function = contract.functions.getLossTolerancePeriodDuration()
     return await function.call()
@@ -127,7 +127,7 @@ async def get_shutdowner(
 ) -> ChecksumAddress:
     contract = client.contract(
         share_price_throttled_asset_manager,
-        "ISharePriceThrottledAssetManagerLib",
+        abis.ISharePriceThrottledAssetManagerLib,
     )
     function = contract.functions.getShutdowner()
     return await function.call()
@@ -139,7 +139,7 @@ async def get_throttle(
 ) -> int:
     contract = client.contract(
         share_price_throttled_asset_manager,
-        "ISharePriceThrottledAssetManagerLib",
+        abis.ISharePriceThrottledAssetManagerLib,
     )
     function = contract.functions.getThrottle()
     return await function.call()
@@ -151,7 +151,7 @@ async def get_vault_proxy_address(
 ) -> ChecksumAddress:
     contract = client.contract(
         share_price_throttled_asset_manager,
-        "ISharePriceThrottledAssetManagerLib",
+        abis.ISharePriceThrottledAssetManagerLib,
     )
     function = contract.functions.getVaultProxyAddress()
     return await function.call()

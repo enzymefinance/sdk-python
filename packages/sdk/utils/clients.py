@@ -1,8 +1,10 @@
+import hashlib
+import json
 from web3 import AsyncWeb3
 from web3.types import TContractFn, HexStr, TxParams, ChecksumAddress
 from web3.contract import AsyncContract
 from web3.middleware import ExtraDataToPOAMiddleware
-from ...abis import abis
+from typing import Any
 
 
 class PublicClient:
@@ -12,11 +14,14 @@ class PublicClient:
 
         self._contracts = {}
 
-    def contract(self, address: str, abi_name: str) -> AsyncContract:
-        key = f"{address}_{abi_name}"
-        if key not in self._contracts:
-            abi = abis.get(abi_name)
-            self._contracts[key] = self.w3.eth.contract(address=address, abi=abi)
+    def contract(self, address: str, abi: list[dict[str, Any]]) -> AsyncContract:
+        abi_str = json.dumps(abi, sort_keys=True)
+        key_str = f"{address}_{abi_str}"
+        key = hashlib.md5(key_str.encode()).hexdigest()
+        if key in self._contracts:
+            return self._contracts[key]
+
+        self._contracts[key] = self.w3.eth.contract(address=address, abi=abi)
         return self._contracts[key]
 
     async def populated_transaction(

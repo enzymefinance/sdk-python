@@ -3,6 +3,8 @@ from web3 import Web3
 from web3.types import ChecksumAddress, TxParams, HexStr
 from web3.constants import ADDRESS_ZERO
 from .utils.clients import PublicClient, WalletClient
+from ..abis import abis
+
 
 RELAY_HUB_ABI = [
     {
@@ -151,7 +153,7 @@ async def deploy_gas_relay_paymaster(
     client: WalletClient,
     comptroller_proxy: ChecksumAddress,
 ) -> TxParams:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.deployGasRelayPaymaster()
     return await client.populated_transaction(function)
 
@@ -160,7 +162,7 @@ async def deposit_to_gas_relay_paymaster(
     client: WalletClient,
     comptroller_proxy: ChecksumAddress,
 ) -> TxParams:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.depositToGasRelayPaymaster()
     return await client.populated_transaction(function)
 
@@ -169,7 +171,7 @@ async def shutdown_gas_relay_paymaster(
     client: WalletClient,
     comptroller_proxy: ChecksumAddress,
 ) -> TxParams:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.shutdownGasRelayPaymaster()
     return await client.populated_transaction(function)
 
@@ -183,7 +185,7 @@ async def is_relayer_enabled(
     client: PublicClient,
     comptroller_proxy: ChecksumAddress,
 ) -> bool:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.getGasRelayPaymaster()
     gas_relay_paymaster_address = await function.call()
     return gas_relay_paymaster_address != ADDRESS_ZERO
@@ -193,7 +195,7 @@ async def get_gas_relay_paymaster(
     client: PublicClient,
     comptroller_proxy: ChecksumAddress,
 ) -> ChecksumAddress:
-    contract = client.contract(comptroller_proxy, "IComptrollerLib")
+    contract = client.contract(comptroller_proxy, abis.IComptrollerLib)
     function = contract.functions.getGasRelayPaymaster()
     return await function.call()
 
@@ -202,7 +204,7 @@ async def get_relayer_balance(
     client: PublicClient,
     gas_relay_paymaster: ChecksumAddress,
 ) -> int:
-    contract = client.contract(gas_relay_paymaster, "IGasRelayPaymasterLib")
+    contract = client.contract(gas_relay_paymaster, abis.IGasRelayPaymasterLib)
     function = contract.functions.getRelayHubDeposit()
     return await function.call()
 
@@ -211,7 +213,7 @@ async def get_trusted_forwarder(
     client: PublicClient,
     gas_relay_paymaster: ChecksumAddress,
 ) -> ChecksumAddress:
-    contract = client.contract(gas_relay_paymaster, "IGasRelayPaymasterLib")
+    contract = client.contract(gas_relay_paymaster, abis.IGasRelayPaymasterLib)
     function = contract.functions.trustedForwarder()
     return await function.call()
 
@@ -221,7 +223,7 @@ async def get_nonce(
     trusted_forwarder: ChecksumAddress,
     sender: ChecksumAddress,
 ) -> int:
-    contract = client.contract(trusted_forwarder, "IForwarder")
+    contract = client.contract(trusted_forwarder, abis.IForwarder)
     function = contract.functions.getNonce(sender)
     return await function.call()
 

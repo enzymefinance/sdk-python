@@ -1,6 +1,7 @@
 from web3.types import ChecksumAddress
 from .utils.clients import PublicClient
 from web3.exceptions import ContractLogicError
+from ..abis import abis
 
 
 async def get_nav(
@@ -8,7 +9,7 @@ async def get_nav(
     vault_proxy: ChecksumAddress,
     value_calculator: ChecksumAddress,
 ) -> dict[ChecksumAddress, int]:
-    contract = client.contract(value_calculator, "IFundValueCalculatorRouter")
+    contract = client.contract(value_calculator, abis.IFundValueCalculatorRouter)
     function = contract.functions.calcNav(vault_proxy)
     asset, value = await function.call()
     return {"asset": asset, "value": value}
@@ -20,7 +21,7 @@ async def get_nav_in_asset(
     vault_proxy: ChecksumAddress,
     value_calculator: ChecksumAddress,
 ) -> int:
-    contract = client.contract(value_calculator, "IFundValueCalculatorRouter")
+    contract = client.contract(value_calculator, abis.IFundValueCalculatorRouter)
     function = contract.functions.calcNavInAsset(vault_proxy, asset)
     return await function.call()
 
@@ -30,7 +31,7 @@ async def get_gav(
     vault_proxy: ChecksumAddress,
     value_calculator: ChecksumAddress,
 ) -> dict[ChecksumAddress, int]:
-    contract = client.contract(value_calculator, "IFundValueCalculatorRouter")
+    contract = client.contract(value_calculator, abis.IFundValueCalculatorRouter)
     function = contract.functions.calcGav(vault_proxy)
     asset, value = await function.call()
     return {"asset": asset, "value": value}
@@ -42,7 +43,7 @@ async def get_gav_in_asset(
     vault_proxy: ChecksumAddress,
     value_calculator: ChecksumAddress,
 ) -> int:
-    contract = client.contract(value_calculator, "IFundValueCalculatorRouter")
+    contract = client.contract(value_calculator, abis.IFundValueCalculatorRouter)
     function = contract.functions.calcGavInAsset(vault_proxy, asset)
     return await function.call()
 
@@ -52,7 +53,7 @@ async def get_share_price(
     vault_proxy: ChecksumAddress,
     value_calculator: ChecksumAddress,
 ) -> dict[ChecksumAddress, int]:
-    contract = client.contract(value_calculator, "IFundValueCalculatorRouter")
+    contract = client.contract(value_calculator, abis.IFundValueCalculatorRouter)
     function = contract.functions.calcNetShareValue(vault_proxy)
     asset, value = await function.call()
     return {"asset": asset, "value": value}
@@ -64,7 +65,7 @@ async def get_share_price_in_asset(
     vault_proxy: ChecksumAddress,
     value_calculator: ChecksumAddress,
 ) -> int:
-    contract = client.contract(value_calculator, "IFundValueCalculatorRouter")
+    contract = client.contract(value_calculator, abis.IFundValueCalculatorRouter)
     function = contract.functions.calcNetShareValueInAsset(vault_proxy, asset)
     return await function.call()
 
@@ -74,7 +75,7 @@ async def get_canonical_asset_value(
     asset: ChecksumAddress,
     value_calculator: ChecksumAddress,
 ) -> int:
-    contract = client.contract(value_calculator, "IValueInterpreter")
+    contract = client.contract(value_calculator, abis.IValueInterpreter)
     function = contract.functions.calcCanonicalAssetValue(asset)
     try:
         return await function.call()
@@ -89,7 +90,7 @@ async def calc_canonical_assets_total_value(
     amounts: list[int],
     quote_asset: ChecksumAddress,
 ) -> int:
-    contract = client.contract(value_interpreter, "IValueInterpreter")
+    contract = client.contract(value_interpreter, abis.IValueInterpreter)
     function = contract.functions.calcCanonicalAssetsTotalValue(
         base_assets, amounts, quote_asset
     )

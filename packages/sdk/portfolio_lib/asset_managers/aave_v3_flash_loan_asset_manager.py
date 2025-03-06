@@ -15,8 +15,7 @@ def encode_deploy_proxy_construct_data(
     owner: ChecksumAddress,
     borrowed_assets_recipient: ChecksumAddress,
 ) -> HexStr:
-    abi = abis.get("IAaveV3FlashLoanAssetManager")
-    contract = Web3().eth.contract(abi=abi)
+    contract = Web3().eth.contract(abi=abis.IAaveV3FlashLoanAssetManager)
     return contract.encode_abi(
         "init",
         [owner, borrowed_assets_recipient],
@@ -30,7 +29,7 @@ async def deploy_proxy(
 ) -> TxParams:
     construct_data = Web3.to_bytes(hexstr=construct_data)
     contract = client.contract(
-        dispatcher_owned_beacon_factory, "IDispatcherOwnedBeaconFactory"
+        dispatcher_owned_beacon_factory, abis.IDispatcherOwnedBeaconFactory
     )
     function = contract.functions.deployProxy(construct_data)
     return await client.populated_transaction(function)
@@ -75,7 +74,7 @@ async def flash_loan(
     encoded_calls: HexStr,
 ) -> TxParams:
     contract = client.contract(
-        aave_v3_flash_loan_asset_manager, "IAaveV3FlashLoanAssetManager"
+        aave_v3_flash_loan_asset_manager, abis.IAaveV3FlashLoanAssetManager
     )
     function = contract.functions.flashLoan(assets, amounts, encoded_calls)
     return await client.populated_transaction(function)
@@ -86,7 +85,7 @@ async def get_borrowed_assets_recipient(
     aave_v3_flash_loan_asset_manager: ChecksumAddress,
 ) -> ChecksumAddress:
     contract = client.contract(
-        aave_v3_flash_loan_asset_manager, "IAaveV3FlashLoanAssetManager"
+        aave_v3_flash_loan_asset_manager, abis.IAaveV3FlashLoanAssetManager
     )
     function = contract.functions.getBorrowedAssetsRecipient()
     return await function.call()
@@ -97,7 +96,7 @@ async def get_owner(
     aave_v3_flash_loan_asset_manager: ChecksumAddress,
 ) -> ChecksumAddress:
     contract = client.contract(
-        aave_v3_flash_loan_asset_manager, "IAaveV3FlashLoanAssetManager"
+        aave_v3_flash_loan_asset_manager, abis.IAaveV3FlashLoanAssetManager
     )
     function = contract.functions.getOwner()
     return await function.call()
