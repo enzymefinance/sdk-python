@@ -1,5 +1,5 @@
 from web3 import AsyncWeb3
-from web3.types import TContractFn, HexStr, TxParams
+from web3.types import TContractFn, HexStr, TxParams, ChecksumAddress
 from web3.contract import AsyncContract
 from web3.middleware import ExtraDataToPOAMiddleware
 from ...abis import abis
@@ -19,6 +19,25 @@ class PublicClient:
             self._contracts[key] = self.w3.eth.contract(address=address, abi=abi)
         return self._contracts[key]
 
+    async def populated_transaction(
+        self,
+        function: TContractFn,
+        account: ChecksumAddress,
+        value: int | None = None,
+    ) -> TxParams:
+        nonce = await self.w3.eth.get_transaction_count(account)
+
+        transaction_payload = {
+            "nonce": nonce,
+            "from": account,
+            # "chainId": self.chain_id,
+        }
+
+        if value is not None:
+            transaction_payload["value"] = value
+
+        return await function.build_transaction(transaction_payload)
+
 
 class WalletClient(PublicClient):
     def __init__(
@@ -31,17 +50,15 @@ class WalletClient(PublicClient):
         self.chain_id = chain_id
         self.account = self.w3.eth.account.from_key(private_key)
 
-    async def populated_transaction(self, function: TContractFn) -> TxParams:
-        from_address = self.account.address
-        nonce = await self.w3.eth.get_transaction_count(from_address)
-
-        transaction_payload = {
-            "nonce": nonce,
-            "from": from_address,
-            "chainId": self.chain_id,
-        }
-
-        return await function.build_transaction(transaction_payload)
+    async def populated_transaction(
+        self,
+        function: TContractFn,
+        account: ChecksumAddress | None = None,
+        value: int | None = None,
+    ) -> TxParams:
+        return await super().populated_transaction(
+            function, account or self.account.address, value
+        )
 
     async def send_transaction(self, transaction: TxParams) -> HexStr:
         signed_transaction = self.w3.eth.account.sign_transaction(

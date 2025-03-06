@@ -149,7 +149,6 @@ async def get_canonical_value(
     quote_asset: ChecksumAddress,
     amount: int,
 ) -> int:
-    # TODO: simulate contract?
     contract = client.contract(value_interpreter, "IValueInterpreter")
     function = contract.functions.calcCanonicalAssetValue(
         base_asset, amount, quote_asset
