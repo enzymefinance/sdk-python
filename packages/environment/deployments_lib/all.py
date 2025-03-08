@@ -1,10 +1,10 @@
+from web3 import Web3
 from web3.constants import ADDRESS_ZERO
 from eth_typing import ChecksumAddress
-from ..contracts import Deployment, Version, is_version
+from ..contracts import Version, is_version
 from ..environment import Environment, EnvironmentGroup
-from ..releases import Release, is_deployment
+from ..releases import Deployment, Release, is_deployment
 from ..networks import Network, NetworkSlug, get_network, is_network_identifier
-from ..utils import is_non_zero_address
 from .arbitrum import ARBITRUM
 from .base import BASE
 from .ethereum import ETHEREUM
@@ -61,7 +61,10 @@ def get_environment(
 
         if release is not None:
             return Environment(deployment, release["version"])
-    elif is_non_zero_address(version_or_address):
+    elif (
+        Web3.is_checksum_address(version_or_address)
+        and version_or_address != ADDRESS_ZERO
+    ):
         release = next(
             (
                 release

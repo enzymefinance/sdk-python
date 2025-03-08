@@ -1,3 +1,4 @@
+from enum import IntEnum
 from web3.types import ChecksumAddress
 from typing import Literal, TypedDict
 
@@ -58,10 +59,9 @@ DERIVATIVE_PRICE_FEEDS = [
 ]
 
 
-RateAsset = Literal[
-    0,  # ETH
-    1,  # USD
-]
+class RateAsset(IntEnum):
+    ETH = 0
+    USD = 1
 
 
 class PriceFeedBase(TypedDict, total=False):

@@ -57,9 +57,9 @@ NETWORK_BY_SLUG = dict(zip(get_args(NetworkSlug), get_args(Network)))
 
 ARBITRUM: NetworkDefinition = {
     "currency": {
-        "wrapper": "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
+        "wrapper": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
         "native_token": {
-            "id": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "id": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
             "name": "Ether",
             "symbol": "ETH",
             "decimals": 18,
@@ -87,7 +87,7 @@ BASE: NetworkDefinition = {
     "currency": {
         "wrapper": "0x4200000000000000000000000000000000000006",
         "native_token": {
-            "id": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "id": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
             "name": "Ether",
             "symbol": "ETH",
             "decimals": 18,
@@ -113,9 +113,9 @@ BASE: NetworkDefinition = {
 
 MAINNET: NetworkDefinition = {
     "currency": {
-        "wrapper": "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
+        "wrapper": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
         "native_token": {
-            "id": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+            "id": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
             "name": "Ether",
             "symbol": "ETH",
             "decimals": 18,
@@ -141,7 +141,7 @@ MAINNET: NetworkDefinition = {
 
 POLYGON: NetworkDefinition = {
     "currency": {
-        "wrapper": "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
+        "wrapper": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
         "native_token": {
             "id": "0x0000000000000000000000000000000000001010",
             "name": "Polygon Ecosystem Token",
