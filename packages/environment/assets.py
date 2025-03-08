@@ -1,8 +1,7 @@
 from typing import Literal, TypedDict
 from web3.types import ChecksumAddress, HexStr
-from .networks import Network
 from .price_feeds import PriceFeed
-from .releases import Release
+from .types import Network, Release
 
 
 AssetType = Literal[

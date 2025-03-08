@@ -1,10 +1,10 @@
 from typing import Any, Literal, TypedDict, get_args
 from web3.types import ChecksumAddress
-
 from .assets import PrimitiveAsset
+from .types import Network
 
 
-Network = Literal[42161, 8453, 1, 137]
+# Network = Literal[42161, 8453, 1, 137] -> defined in types.py to avoid circular import
 
 
 NetworkSlug = Literal["arbitrum", "base", "ethereum", "polygon"]

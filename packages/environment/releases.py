@@ -3,6 +3,7 @@ from web3.types import ChecksumAddress
 from .contracts import is_version, Contracts, Version
 from .assets import PrimitiveAsset, CompoundV2Asset, ERC4626Asset, AssetType
 from .networks import Network
+from .types import Release
 
 
 Status = Literal["live", "pending", "deprecated"]
@@ -310,15 +311,15 @@ class DeploymentDefinition(TypedDict):
     releases: dict[Version, ReleaseDefinition]
 
 
-Release = Literal[
-    "arbitrum.sulu",
-    "base.sulu",
-    "ethereum.sulu",
-    "ethereum.encore",
-    "ethereum.phoenix",
-    "polygon.sulu",
-    "testnet.sulu",
-]
+# Release = Literal[
+#     "arbitrum.sulu",
+#     "base.sulu",
+#     "ethereum.sulu",
+#     "ethereum.encore",
+#     "ethereum.phoenix",
+#     "polygon.sulu",
+#     "testnet.sulu",
+# ] -> defined in types.py to avoid circular import
 
 
 class ReleasesTypeVersion(TypedDict, total=False):

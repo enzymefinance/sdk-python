@@ -1,12 +1,6 @@
-from web3 import Web3
-from web3.constants import ADDRESS_ZERO
 from .networks import Network, NetworkSlug, is_network_identifier, get_network
 from .releases import Deployment, is_deployment
 from .deployments_lib.all import DEPLOYMENTS
-
-
-def is_non_zero_address(address: str) -> bool:
-    return Web3.is_checksum_address(address) and address != ADDRESS_ZERO
 
 
 def get_deployment(
