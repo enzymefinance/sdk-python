@@ -10,7 +10,7 @@ def get_deployment(
         return DEPLOYMENTS[deployment_or_network]
     if is_network_identifier(deployment_or_network):
         network = get_network(deployment_or_network)
-        for deployment in DEPLOYMENTS:
+        for deployment in DEPLOYMENTS.values():
             if deployment["network"] == network["id"] and deployment["kind"] == "live":
                 return deployment
         raise ValueError(f"Missing deployment for network {network['slug']}")

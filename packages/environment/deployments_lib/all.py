@@ -5,11 +5,11 @@ from ..contracts import Version, is_version
 from ..environment import Environment, EnvironmentGroup
 from ..releases import Deployment, Release, is_deployment
 from ..networks import Network, NetworkSlug, get_network, is_network_identifier
-from .arbitrum import ARBITRUM
-from .base import BASE
-from .ethereum import ETHEREUM
-from .polygon import POLYGON
-from .testnet import TESTNET
+from .arbitrum import DEPLOYMENT as ARBITRUM
+from .base import DEPLOYMENT as BASE
+from .ethereum import DEPLOYMENT as ETHEREUM
+from .polygon import DEPLOYMENT as POLYGON
+from .testnet import DEPLOYMENT as TESTNET
 
 
 DEPLOYMENTS = {
