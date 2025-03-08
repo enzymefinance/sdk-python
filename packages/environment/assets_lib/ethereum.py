@@ -1,4 +1,3 @@
-from web3 import Web3
 from ..releases import RELEASES
 from ..assets import define_asset_list
 from ..networks import NETWORK_BY_SLUG

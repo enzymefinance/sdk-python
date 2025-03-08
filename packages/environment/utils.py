@@ -7,7 +7,7 @@ def get_deployment(
     deployment_or_network: Deployment | Network | NetworkSlug,
 ) -> Deployment:
     if is_deployment(deployment_or_network):
-        return deployment_or_network
+        return DEPLOYMENTS[deployment_or_network]
     if is_network_identifier(deployment_or_network):
         network = get_network(deployment_or_network)
         for deployment in DEPLOYMENTS:

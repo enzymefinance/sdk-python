@@ -1,11 +1,10 @@
-from web3 import Web3
 from ..releases import RELEASES
 from ..assets import define_asset_list
 from ..networks import NETWORK_BY_SLUG
 from ..price_feeds import RateAsset
 
 
-TESTNET, POLYGON = [RELEASES["polygon"][r] for r in ["testnet", "polygon"]]
+TESTNET, POLYGON = [RELEASES[r] for r in ["testnet", "polygon"]]
 
 
 ASSETS = define_asset_list(

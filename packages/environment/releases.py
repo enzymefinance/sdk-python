@@ -231,17 +231,17 @@ class SubgraphMapping(TypedDict):
 
 
 class KnownAddressListIdMapping(TypedDict, total=False):
-    noSlippageAdapters: int
+    noslippage_adapters: int
     adapters: int
     fees: int
     policies: int
-    kilnStakingContracts: int
-    nonStandardPriceFeedAssets: int
-    aTokens: int
+    kiln_staking_contracts: int
+    non_standard_price_feed_assets: int
+    a_tokens: int
 
 
 class KnownUintListIdMapping(TypedDict, total=False):
-    allowedMorphoBlueVaults: int
+    allowed_morpho_blue_vaults: int
 
 
 class ExternalContractsMapping(TypedDict):

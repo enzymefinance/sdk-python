@@ -49,10 +49,10 @@ def is_supported_network(value: Any) -> bool:
     return isinstance(value, int) and value in get_args(Network)
 
 
-SLUG_BY_NETWORK = dict(zip(get_args(Network), get_args(NetworkSlug)))
+SLUG_BY_NETWORK: dict[Network, NetworkSlug] = dict(zip(get_args(Network), get_args(NetworkSlug)))
 
 
-NETWORK_BY_SLUG = dict(zip(get_args(NetworkSlug), get_args(Network)))
+NETWORK_BY_SLUG: dict[NetworkSlug, Network] = dict(zip(get_args(NetworkSlug), get_args(Network)))
 
 
 ARBITRUM: NetworkDefinition = {
