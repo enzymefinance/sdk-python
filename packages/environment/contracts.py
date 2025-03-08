@@ -63,6 +63,7 @@ class SuluContracts(CommonContracts):
     CompoundPriceFeed: ChecksumAddress
     CompoundV3TokenListOwner: ChecksumAddress
     CompoundV3Adapter: ChecksumAddress
+    ConvertedQuoteAggregatorFactory: ChecksumAddress
     ConvexVotingPositionLib: ChecksumAddress
     ConvexVotingPositionParser: ChecksumAddress
     CumulativeSlippageTolerancePolicy: ChecksumAddress
@@ -166,6 +167,14 @@ class SuluContracts(CommonContracts):
     ZeroExV2Adapter: ChecksumAddress
     ZeroExV4Adapter: ChecksumAddress
     ZeroExV4AdapterPmm2Kyc: ChecksumAddress
+    ZeroLendLRTBTCAaveV3Adapter: ChecksumAddress
+    ZeroLendLRTBTCAaveV3ATokenListOwner: ChecksumAddress
+    ZeroLendLRTBTCAaveV3DebtPositionLib: ChecksumAddress
+    ZeroLendLRTBTCAaveV3DebtPositionParser: ChecksumAddress
+    ZeroLendRWAStablecoinsAaveV3Adapter: ChecksumAddress
+    ZeroLendRWAStablecoinsAaveV3ATokenListOwner: ChecksumAddress
+    ZeroLendRWAStablecoinsAaveV3DebtPositionLib: ChecksumAddress
+    ZeroLendRWAStablecoinsAaveV3DebtPositionParser: ChecksumAddress
 
 
 class EncoreContracts(CommonContracts):

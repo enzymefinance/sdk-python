@@ -41,6 +41,8 @@ AdapterType = Literal[
     "zeroex_v2",
     "zeroex_v4",
     "zeroex_v4_pmm_kyc",
+    "zero_lend_lrt_btc_aave_v3",
+    "zero_lend_rwa_stablecoins_aave_v3",
 ]
 
 KnownAdapterType = Literal[
@@ -304,6 +306,16 @@ KNOWN_ADAPTER_DEFINITIONS: dict[KnownAdapterType, UnresolvedAdapterDefinition] =
         "contract_name": "ZeroExV4AdapterPmm2Kyc",
         "name": "0x V4",
         "type": "zeroex_v4_pmm_kyc",  # AdapterType
+    },
+    "zero_lend_lrt_btc_aave_v3": {
+        "contract_name": "ZeroLendLRTBTCAaveV3Adapter",
+        "name": "Zero Lend LRT BTC Supply",
+        "type": "zero_lend_lrt_btc_aave_v3",  # AdapterType
+    },
+    "zero_lend_rwa_stablecoins_aave_v3": {
+        "contract_name": "ZeroLendRWAStablecoinsAaveV3Adapter",
+        "name": "Zero Lend RWA Stablecoins Supply",
+        "type": "zero_lend_rwa_stablecoins_aave_v3",  # AdapterType
     },
 }
 

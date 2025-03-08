@@ -71,3 +71,12 @@ async def get_price_feed_for_derivative(
     contract = client.contract(value_interpreter, abis.IValueInterpreter)
     function = contract.functions.getPriceFeedForDerivative(asset)
     return await function.call()
+
+
+async def get_eth_usd_aggregator(
+    client: PublicClient,
+    value_interpreter: ChecksumAddress,
+) -> ChecksumAddress:
+    contract = client.contract(value_interpreter, abis.IValueInterpreter)
+    function = contract.functions.getEthUsdAggregator()
+    return await function.call()

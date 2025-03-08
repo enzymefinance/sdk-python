@@ -1015,8 +1015,8 @@ ASSETS = define_asset_list(
             "underlying": "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270",
             "price_feed": {
                 "type": "PRIMITIVE_CHAINLINK",
-                "aggregator": "0x327e23A4855b6F663a28c5161541d69Af8973302",
-                "rate_asset": RateAsset.ETH,
+                "aggregator": "0xAB594600376Ec9fD91F8e885dADF0CE036862dE0",
+                "rate_asset": RateAsset.USD,
             },
         },
         {

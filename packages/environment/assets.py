@@ -24,6 +24,8 @@ AssetType = Literal[
     "maple-v1"
     "maple-v2"
     "erc-4626"
+    "zero-lend-lrt-btc-aave-v3"
+    "zero-lend-rwa-stablecoins-aave-v3"
 ]
 
 
@@ -71,6 +73,18 @@ class AaveV2Asset(AssetBase):
 
 class AaveV3Asset(AssetBase):
     type: Literal["aave-v3"]
+    # Underlying Asset
+    underlying: ChecksumAddress
+
+
+class ZeroLendLRTBTCAaveV3Asset(AssetBase):
+    type: Literal["zero-lend-lrt-btc-aave-v3"]
+    # Underlying Asset
+    underlying: ChecksumAddress
+
+
+class ZeroLendRWAStablecoinsAaveV3Asset(AssetBase):
+    type: Literal["zero-lend-rwa-stablecoins-aave-v3"]
     # Underlying Asset
     underlying: ChecksumAddress
 
@@ -236,6 +250,8 @@ Asset = (
     | SynthetixAsset
     | UniswapV2PoolAsset
     | YearnVaultV2Asset
+    | ZeroLendLRTBTCAaveV3Asset
+    | ZeroLendRWAStablecoinsAaveV3Asset
 )
 
 

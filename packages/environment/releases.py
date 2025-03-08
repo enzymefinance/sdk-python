@@ -238,6 +238,13 @@ class KnownAddressListIdMapping(TypedDict, total=False):
     kiln_staking_contracts: int
     non_standard_price_feed_assets: int
     a_tokens: int
+    deposit_wrapper_allowed_exchanges: int
+
+
+class KnownAddressListIdMappingEthereumSpecific(KnownAddressListIdMapping):
+    kiln_staking_contracts: int
+    zero_lend_rwa_stablecoins_a_tokens: int
+    zero_lend_lrt_btc_a_tokens: int
 
 
 class KnownUintListIdMapping(TypedDict, total=False):
@@ -293,13 +300,22 @@ class ExternalContractsMapping(TypedDict):
     votiumVoteProxy: ChecksumAddress
     zeroExExchangeProxy: ChecksumAddress
     zeroExV4Exchange: ChecksumAddress
+    zeroLendAaveV3UIIncentiveDataProvider: ChecksumAddress
+    zeroLendLRTBTCAaveV3LendingPoolProvider: ChecksumAddress
+    zeroLendLRTBTCAaveV3ProtocolDataProvider: ChecksumAddress
+    zeroLendLRTBTCAaveV3RewardsController: ChecksumAddress
+    zeroLendRWAStablecoinsAaveV3LendingPoolProvider: ChecksumAddress
+    zeroLendRWAStablecoinsAaveV3ProtocolDataProvider: ChecksumAddress
+    zeroLendRWAStablecoinsAaveV3RewardsController: ChecksumAddress
 
 
 class DeploymentDefinition(TypedDict):
     slug: Deployment
     network: Network
     external_contracts: ExternalContractsMapping
-    known_address_lists: KnownAddressListIdMapping
+    known_address_lists: (
+        KnownAddressListIdMapping | KnownAddressListIdMappingEthereumSpecific
+    )
     known_uint_lists: KnownUintListIdMapping
     kind: Kind
     address: ChecksumAddress
