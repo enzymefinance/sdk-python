@@ -35,7 +35,6 @@ class PublicClient:
         transaction_payload = {
             "nonce": nonce,
             "from": account,
-            # "chainId": self.chain_id,
         }
 
         if value is not None:
@@ -48,11 +47,9 @@ class WalletClient(PublicClient):
     def __init__(
         self,
         rpc_url: str,
-        chain_id: int,
         private_key: str,
     ):
         super().__init__(rpc_url)
-        self.chain_id = chain_id
         self.account = self.w3.eth.account.from_key(private_key)
 
     async def populated_transaction(
