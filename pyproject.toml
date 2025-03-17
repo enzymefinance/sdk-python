@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "enzymefinance"
-version = "0.1.0"
+version = "0.1.1"
 description = "Official Python SDK for the Enzyme Protocol"
 readme = "README.md"
 requires-python = ">=3.9"
@@ -34,8 +34,8 @@ Homepage = "https://github.com/enzymefinance/sdk-python"
 Documentation = "https://sdk.enzyme.finance"
 Repository = "https://github.com/enzymefinance/sdk-python"
 
-[tool.setuptools.packages.find]
-where = ["packages"]
+[tool.setuptools]
+package-dir = {"enzymefinance" = "packages"}
 
 [tool.setuptools.package-data]
 "enzymefinance.abis" = ["abis/*.abi.json"]
